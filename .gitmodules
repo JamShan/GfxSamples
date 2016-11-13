@@ -1,0 +1,3 @@
+[submodule "extern/GfxSampleFramework"]
+	path = extern/GfxSampleFramework
+	url = https://github.com/john-chapman/GfxSampleFramework.git
