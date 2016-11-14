@@ -1,0 +1,28 @@
+Misc graphics samples/tests.
+
+Submodule dependencies:
+
+	- [GfxSampleFramework](https://github.com/john-chapman/GfxSampleFramework)
+	- [ApplicationTools](https://github.com/john-chapman/ApplicationTools)
+	- [GLM](https://github.com/g-truc/glm)
+
+Committed dependencies:
+
+	- [RapidJSON](http://rapidjson.org/)
+	- [LodePNG](http://lodev.org/lodepng/)
+	- [ImGui](https://github.com/ocornut/imgui)
+	- [stb](https://github.com/nothings/stb)
+	- [tinyobjloader](https://github.com/syoyo/tinyobjloader)
+	- [lua](https://www.lua.org)
+
+Use `git clone --recursive` to init/clone all submodules, as follows:
+```
+	git clone --recursive https://github.com/john-chapman/GfxSamples.git
+```
+
+Build via `build/GfxSamples_premake.lua` as follows (requires premake5):
+```
+	premake5 --file=GfxSamples_premake.lua [target]
+```
+
+Currently only tested with `target` = `vs2012` or `vs2015`. Windows/OpenGL only.
