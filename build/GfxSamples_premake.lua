@@ -4,6 +4,7 @@ local APT_DIR     = FRM_DIR .. "extern/ApplicationTools/"
 local SRC_DIR     = "../src/"
 
 filter { "configurations:debug" }
+	defines { "APT_DEBUG", "FRM_DEBUG" }
 	targetsuffix "_debug"
 	symbols "On"
 	optimize "Off"
