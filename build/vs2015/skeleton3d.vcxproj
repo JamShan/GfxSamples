@@ -70,8 +70,10 @@
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)..\../extern/GfxSampleFramework/data\*.*" "$(ProjectDir)..\..\bin\*.*" /y /d /i /e
-attrib /S +R "$(ProjectDir)..\..\bin\*.glsl"</Command>
+      <Command>rmdir "$(ProjectDir)..\..\bin\common"
+mklink /j "$(ProjectDir)..\..\bin\common" "$(ProjectDir)..\../extern/GfxSampleFramework/data\common"
+rmdir "$(ProjectDir)..\..\bin\skeleton3d"
+mklink /j "$(ProjectDir)..\..\bin\skeleton3d" "$(ProjectDir)..\..\data\skeleton3d"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Win64|x64'">
@@ -97,8 +99,10 @@ attrib /S +R "$(ProjectDir)..\..\bin\*.glsl"</Command>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)..\../extern/GfxSampleFramework/data\*.*" "$(ProjectDir)..\..\bin\*.*" /y /d /i /e
-attrib /S +R "$(ProjectDir)..\..\bin\*.glsl"</Command>
+      <Command>rmdir "$(ProjectDir)..\..\bin\common"
+mklink /j "$(ProjectDir)..\..\bin\common" "$(ProjectDir)..\../extern/GfxSampleFramework/data\common"
+rmdir "$(ProjectDir)..\..\bin\skeleton3d"
+mklink /j "$(ProjectDir)..\..\bin\skeleton3d" "$(ProjectDir)..\..\data\skeleton3d"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

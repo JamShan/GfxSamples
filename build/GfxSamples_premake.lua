@@ -74,7 +74,9 @@ for name,fileList in pairs(projList) do
 			
 		filter { "action:vs*" }
 			postbuildcommands({
-				"xcopy \"$(ProjectDir)..\\" .. FRM_DIR .. "data\\*.*\"" .. " \"$(ProjectDir)..\\..\\bin\\*.*\"" .. " /y /d /i /e",
-				"attrib /S +R \"$(ProjectDir)..\\..\\bin\\*.glsl\"",
+				"rmdir \"$(ProjectDir)..\\..\\bin\\common\"",
+				"mklink /j \"$(ProjectDir)..\\..\\bin\\common\" " .. "\"$(ProjectDir)..\\" .. FRM_DIR .. "data\\common\"",
+				"rmdir \"$(ProjectDir)..\\..\\bin\\" .. tostring(name) .. "\"",
+				"mklink /j \"$(ProjectDir)..\\..\\bin\\" .. tostring(name) .. "\" " .. "\"$(ProjectDir)..\\..\\data\\" .. tostring(name) .. "\"",
 				})
 end
