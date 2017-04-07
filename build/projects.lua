@@ -1,15 +1,17 @@
 local projList = 
 {
-	skeleton = 
-	{ 
-		"../src/_skeleton.h", 
-		"../src/_skeleton.cpp",
-	},
+	--skeleton = 
+	--{ 
+	--	"../src/_skeleton.*", 
+	--},
+	--skeleton3d =
+	--{ 
+	--	"../src/_skeleton3d.*",
+	--},
 	
-	skeleton3d =
+	LensFlare_ScreenSpace =
 	{ 
-		"../src/_skeleton3d.h", 
-		"../src/_skeleton3d.cpp",
+		"../src/LensFlare_ScreenSpace.*",
 	},
 }
 return projList
