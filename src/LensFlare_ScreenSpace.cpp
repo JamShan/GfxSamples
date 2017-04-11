@@ -8,6 +8,7 @@
 #include <frm/Texture.h>
 
 #include <apt/ArgList.h>
+#include <apt/Image.h>
 
 using namespace frm;
 using namespace apt;
@@ -39,7 +40,10 @@ bool LensFlare_ScreenSpace::init(const apt::ArgList& _args)
 	m_txSceneDepth->setName("txSceneDepth");
 	m_txSceneDepth->setWrap(GL_CLAMP_TO_EDGE);
 	m_fbScene = Framebuffer::Create(2, m_txSceneColor, m_txSceneDepth);
-	m_txEnvmap = Texture::Create("textures/factory.hdr");
+
+	m_txEnvmap = Texture::CreateCubemap2x3("textures/diacourt_cube2x3.hdr");
+	m_shEnvMap = Shader::CreateVsFs("shaders/Envmap_vs.glsl", "shaders/Envmap_fs.glsl", "ENVMAP_CUBE\0");
+	
 
  // lens flare
 
@@ -73,7 +77,16 @@ bool LensFlare_ScreenSpace::update()
 
 void LensFlare_ScreenSpace::draw()
 {
-	// sample code here
+	GlContext* ctx = GlContext::GetCurrent();
+	Camera* cam = Scene::GetDrawCamera();
+
+ // scene
+	ctx->setFramebufferAndViewport(m_fbScene);
+	ctx->setShader(m_shEnvMap);
+	ctx->bindTexture("txEnvmap", m_txEnvmap);
+	ctx->drawNdcQuad(cam);
+
+	ctx->blitFramebuffer(m_fbScene, nullptr);
 
 	AppBase::draw();
 }

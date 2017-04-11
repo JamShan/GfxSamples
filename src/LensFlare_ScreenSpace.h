@@ -26,6 +26,7 @@ public:
 	frm::Texture*     m_txSceneColor;
 	frm::Texture*     m_txSceneDepth;
 	frm::Framebuffer* m_fbScene;
+	frm::Shader*      m_shEnvMap;
 
 	frm::Texture*     m_txEnvmap;
 
