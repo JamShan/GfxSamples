@@ -4,6 +4,7 @@
 #include <frm/gl.h>
 #include <frm/Framebuffer.h>
 #include <frm/GlContext.h>
+#include <frm/Profiler.h>
 #include <frm/Shader.h>
 #include <frm/Texture.h>
 
@@ -18,6 +19,9 @@ static LensFlare_ScreenSpace s_inst;
 LensFlare_ScreenSpace::LensFlare_ScreenSpace()
 	: AppBase("LensFlare_ScreenSpace")
 {
+	AppPropertyGroup& props = m_properties.addGroup("LensFlare_ScreenSpace");
+	//                              name                  display name                   default              min    max    hidden
+	m_downsample     = props.addInt("Downsample",         "Downsample",                  0,                   0,     32,    false);
 }
 
 LensFlare_ScreenSpace::~LensFlare_ScreenSpace()
@@ -36,6 +40,7 @@ bool LensFlare_ScreenSpace::init(const apt::ArgList& _args)
 	m_txSceneColor = Texture::Create2d(m_resolution.x, m_resolution.y, GL_R11F_G11F_B10F, mipCount);
 	m_txSceneColor->setName("txSceneColor");
 	m_txSceneColor->setWrap(GL_CLAMP_TO_EDGE);
+	m_txSceneColor->setMagFilter(GL_LINEAR_MIPMAP_NEAREST);
 	m_txSceneDepth = Texture::Create2d(m_resolution.x, m_resolution.y, GL_DEPTH32F_STENCIL8);
 	m_txSceneDepth->setName("txSceneDepth");
 	m_txSceneDepth->setWrap(GL_CLAMP_TO_EDGE);
@@ -81,11 +86,17 @@ void LensFlare_ScreenSpace::draw()
 	Camera* cam = Scene::GetDrawCamera();
 
  // scene
-	ctx->setFramebufferAndViewport(m_fbScene);
-	ctx->setShader(m_shEnvMap);
-	ctx->bindTexture("txEnvmap", m_txEnvmap);
-	ctx->drawNdcQuad(cam);
-
+	{	AUTO_MARKER("Scene");
+		ctx->setFramebufferAndViewport(m_fbScene);
+		ctx->setShader(m_shEnvMap);
+		ctx->bindTexture("txEnvmap", m_txEnvmap);
+		ctx->drawNdcQuad(cam);
+	
+	// \todo perform this manually (compute shader?) - experiment with average vs. max luminance
+		AUTO_MARKER("Downsample");
+		m_txSceneColor->generateMipmap();
+	}
+	
 	ctx->blitFramebuffer(m_fbScene, nullptr);
 
 	AppBase::draw();

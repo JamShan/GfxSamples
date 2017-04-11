@@ -1,5 +1,13 @@
 /*	Screen space 'pseudo' lens flare.
 
+	(1) Downsample
+
+	(2) Feature generation
+
+	(3) Blur
+
+	(4) Upscale/composite
+
 	References:
 	(1) http://ivizlab.sfu.ca/papers/cgf2012.pdf (separable shaped blur)
 */
@@ -31,7 +39,7 @@ public:
 	frm::Texture*     m_txEnvmap;
 
  // lens flare
-	
+	int*              m_downsample;
 
 };
 
