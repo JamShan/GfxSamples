@@ -35,12 +35,22 @@ public:
 	frm::Texture*     m_txSceneDepth;
 	frm::Framebuffer* m_fbScene;
 	frm::Shader*      m_shEnvMap;
-
 	frm::Texture*     m_txEnvmap;
+	
+	bool initScene();
+	void shutdownScene();
+
 
  // lens flare
 	int*              m_downsample;
+	int*              m_ghostCount;
+	float*            m_ghostSpacing;
+	frm::Shader*      m_shFeatures;
+	frm::Texture*     m_txFeatures;
+	frm::Framebuffer* m_fbFeatures;
 
+	bool initLensFlare();
+	void shutdownLensFlare();
 };
 
 
