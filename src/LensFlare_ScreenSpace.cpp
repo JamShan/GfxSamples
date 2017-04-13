@@ -101,7 +101,7 @@ void LensFlare_ScreenSpace::draw()
 			ctx->setFramebufferAndViewport(m_fbFeatures);
 			ctx->setShader(m_shFeatures);
 			ctx->bindTexture(m_txSceneColor);
-			ctx->setUniform("uDownsample",   *m_downsample);
+			ctx->setUniform("uDownsample",   (float)*m_downsample);
 			ctx->setUniform("uGhostCount",   *m_ghostCount);
 			ctx->setUniform("uGhostSpacing", *m_ghostSpacing);
 			ctx->drawNdcQuad();
@@ -140,14 +140,12 @@ bool LensFlare_ScreenSpace::initScene()
 	m_txSceneColor = Texture::Create2d(m_resolution.x, m_resolution.y, GL_R11F_G11F_B10F, mipCount);
 	m_txSceneColor->setName("txSceneColor");
 	m_txSceneColor->setWrap(GL_CLAMP_TO_EDGE);
-	m_txSceneColor->setMagFilter(GL_LINEAR_MIPMAP_NEAREST);
+	m_txSceneColor->setMinFilter(GL_LINEAR_MIPMAP_NEAREST);
 	m_txSceneDepth = Texture::Create2d(m_resolution.x, m_resolution.y, GL_DEPTH32F_STENCIL8);
 	m_txSceneDepth->setName("txSceneDepth");
 	m_txSceneDepth->setWrap(GL_CLAMP_TO_EDGE);
 	m_fbScene = Framebuffer::Create(2, m_txSceneColor, m_txSceneDepth);
-	//m_txEnvmap = Texture::CreateCubemap2x3("textures/diacourt_cube2x3.hdr");
-	m_txEnvmap = Texture::Create("textures/WoodenDoor_ref.hdr");
-	Texture::ConvertSphereToCube(*m_txEnvmap, 1024);
+	m_txEnvmap = Texture::CreateCubemap2x3("textures/diacourt_cube2x3.hdr");
 
 	bool ret = m_txSceneColor && m_txSceneDepth && m_txEnvmap;
 
