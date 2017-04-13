@@ -36,6 +36,7 @@ public:
 	frm::Framebuffer* m_fbScene;
 	frm::Shader*      m_shEnvMap;
 	frm::Texture*     m_txEnvmap;
+	frm::Shader*      m_shColorCorrection;
 	
 	bool initScene();
 	void shutdownScene();
