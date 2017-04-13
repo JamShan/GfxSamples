@@ -8,6 +8,7 @@
 #include <frm/Shader.h>
 #include <frm/Texture.h>
 
+
 #include <apt/ArgList.h>
 #include <apt/Image.h>
 
@@ -37,12 +38,11 @@ bool LensFlare_ScreenSpace::init(const apt::ArgList& _args)
 	}
 
 	m_shEnvMap = Shader::CreateVsFs("shaders/Envmap_vs.glsl", "shaders/Envmap_fs.glsl", "ENVMAP_CUBE\0");
-	m_shColorCorrection = Shader::CreateVsFs("shaders/Basic_vs.glsl", "shaders/ColorCorrection_fs.glsl");
-
 	m_shFeatures = Shader::CreateVsFs("shaders/Basic_vs.glsl", "shaders/Features_fs.glsl");
 
 	bool ret = m_shEnvMap && m_shFeatures;
 
+	ret &= m_colorCorrection.init(m_properties);
 	ret &= initScene();
 	ret &= initLensFlare();	
 
@@ -53,6 +53,7 @@ void LensFlare_ScreenSpace::shutdown()
 {
 	shutdownScene();
 	shutdownLensFlare();
+	m_colorCorrection.shutdown();
 
 	AppBase::shutdown();
 }
@@ -108,26 +109,8 @@ void LensFlare_ScreenSpace::draw()
 		}
 	}
 	
- // color correction
-	{	AUTO_MARKER("Color Correction");
 
-		static float m_exposure   = 0.0f; // f-stops, do exp2(exposure) before sending to shader
-		static vec3  m_tint       = vec3(0.85f, 1.0f, 0.85f);
-		static float m_saturation = 1.02f;
-		static float m_contrast   = 1.2f;
-		ImGui::SliderFloat("Exposure", &m_exposure, -12.0f, 12.0f);
-		ImGui::ColorEdit3("Tint", &m_tint.x);
-		ImGui::SliderFloat("Saturation", &m_saturation, 0.0f, 4.0f);
-		ImGui::SliderFloat("Contrast", &m_contrast, 0.0f, 2.0f);
-		ctx->setFramebufferAndViewport(0);
-		ctx->setShader(m_shColorCorrection);
-		ctx->setUniform("uExposure", exp2(m_exposure));
-		ctx->setUniform("uTint", m_tint);
-		ctx->setUniform("uSaturation", m_saturation);
-		ctx->setUniform("uContrast", m_contrast);
-		ctx->bindTexture("txInput", m_txSceneColor);
-		ctx->drawNdcQuad();
-	}
+	m_colorCorrection.draw(ctx, m_txSceneColor, nullptr);
 	
 	AppBase::draw();
 }

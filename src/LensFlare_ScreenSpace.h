@@ -17,6 +17,7 @@
 #define LensFlare_ScreenSpace_h
 
 #include <frm/AppSample3d.h>
+#include <frm/RenderNodes.h>
 
 class LensFlare_ScreenSpace: public frm::AppSample3d
 {
@@ -29,6 +30,9 @@ public:
 	virtual void shutdown() override;
 	virtual bool update() override;
 	virtual void draw() override;
+
+ // render nodes
+	frm::ColorCorrection m_colorCorrection;
 
  // scene
 	frm::Texture*     m_txSceneColor;

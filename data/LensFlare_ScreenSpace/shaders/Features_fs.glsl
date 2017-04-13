@@ -17,7 +17,7 @@ void main()
 	
 	vec3 ret = vec3(0.0);
 	for (int i = 0; i < uGhostCount; ++i) {
-		ret += max(textureLod(txSceneColor, uv + ghostVec * vec2(i), uDownsample).rgb - 0.5, 0.0);
+		ret += max(textureLod(txSceneColor, fract(uv + ghostVec * vec2(i)), uDownsample).rgb - 0.5, 0.0);
 	}
 	
 	fResult = ret;
