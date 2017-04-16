@@ -47,12 +47,12 @@ public:
 
 
  // lens flare
-	int*              m_downsample;
-	int*              m_ghostCount;
-	float*            m_ghostSpacing;
-	frm::Shader*      m_shFeatures;
-	frm::Texture*     m_txFeatures;
-	frm::Framebuffer* m_fbFeatures;
+	int                 m_downsample;
+	int                 m_ghostCount;
+	float               m_ghostSpacing;
+	frm::Shader*        m_shFeatures;
+	frm::Texture*       m_txFeatures;
+	frm::Framebuffer*   m_fbFeatures;
 
 	bool initLensFlare();
 	void shutdownLensFlare();

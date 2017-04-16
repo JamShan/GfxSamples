@@ -5,6 +5,7 @@
 #include <frm/Framebuffer.h>
 #include <frm/GlContext.h>
 #include <frm/Profiler.h>
+#include <frm/Property.h>
 #include <frm/Shader.h>
 #include <frm/Texture.h>
 
@@ -20,11 +21,11 @@ static LensFlare_ScreenSpace s_inst;
 LensFlare_ScreenSpace::LensFlare_ScreenSpace()
 	: AppBase("LensFlare_ScreenSpace")
 {
-	AppPropertyGroup& props = m_properties.addGroup("LensFlare_ScreenSpace");
-	//                              name                  display name                   default              min    max    hidden
-	m_downsample   = props.addInt  ("Downsample",         "Downsample",                  0,                   0,     32,    false);
-	m_ghostCount   = props.addInt  ("GhostCount",         "Ghost Count",                 4,                   0,     32,    false);
-	m_ghostSpacing = props.addFloat("GhostSpacing",       "Ghost Spacing",               0.1f,                0.0f,  2.0f,  false);
+	PropertyGroup& propGroup = m_props.addGroup("Lens Flare");
+	//                 name                     default        min     max      storage
+	propGroup.addInt  ("Downsample",            1,             0,      8,       &m_downsample);
+	propGroup.addInt  ("Ghost Count",           4,             0,      32,      &m_downsample);
+	propGroup.addFloat("Ghost Spacing",         0.1f,          0.0f,   2.0f,    &m_ghostSpacing);
 }
 
 LensFlare_ScreenSpace::~LensFlare_ScreenSpace()
@@ -42,7 +43,7 @@ bool LensFlare_ScreenSpace::init(const apt::ArgList& _args)
 
 	bool ret = m_shEnvMap && m_shFeatures;
 
-	ret &= m_colorCorrection.init(m_properties);
+	ret &= m_colorCorrection.init(m_props);
 	ret &= initScene();
 	ret &= initLensFlare();	
 
@@ -66,11 +67,11 @@ bool LensFlare_ScreenSpace::update()
 
 	bool reinit = false;
 	ImGui::Begin("Lens Flare");
-		reinit |= ImGui::SliderInt("Downsample", m_downsample, 0, m_txSceneColor->getMipCount() - 1);
+		reinit |= ImGui::SliderInt("Downsample", &m_downsample, 0, m_txSceneColor->getMipCount() - 1);
 
 		ImGui::Spacing();
-		ImGui::SliderInt("Ghost Count", m_ghostCount, 0, 32);
-		ImGui::SliderFloat("Ghost Spacing", m_ghostSpacing, 0.0f, 2.0f);
+		ImGui::SliderInt("Ghost Count", &m_ghostCount, 0, 32);
+		ImGui::SliderFloat("Ghost Spacing", &m_ghostSpacing, 0.0f, 2.0f);
 	ImGui::End();
 	if (reinit) {
 		initLensFlare();
@@ -102,14 +103,14 @@ void LensFlare_ScreenSpace::draw()
 			ctx->setFramebufferAndViewport(m_fbFeatures);
 			ctx->setShader(m_shFeatures);
 			ctx->bindTexture(m_txSceneColor);
-			ctx->setUniform("uDownsample",   (float)*m_downsample);
-			ctx->setUniform("uGhostCount",   *m_ghostCount);
-			ctx->setUniform("uGhostSpacing", *m_ghostSpacing);
+			ctx->setUniform("uDownsample",   (float)m_downsample);
+			ctx->setUniform("uGhostCount",   m_ghostCount);
+			ctx->setUniform("uGhostSpacing", m_ghostSpacing);
 			ctx->drawNdcQuad();
 		}
 	}
 	
-
+	//ctx->blitFramebuffer(m_fbFeatures, nullptr);
 	m_colorCorrection.draw(ctx, m_txSceneColor, nullptr);
 	
 	AppBase::draw();
@@ -129,7 +130,7 @@ bool LensFlare_ScreenSpace::initScene()
 	m_txSceneDepth->setWrap(GL_CLAMP_TO_EDGE);
 	m_fbScene = Framebuffer::Create(2, m_txSceneColor, m_txSceneDepth);
 	m_txEnvmap = Texture::CreateCubemap2x3("textures/diacourt_cube2x3.hdr");
-
+	
 	bool ret = m_txSceneColor && m_txSceneDepth && m_txEnvmap;
 
 	return ret;
@@ -149,8 +150,8 @@ bool LensFlare_ScreenSpace::initLensFlare()
 	shutdownLensFlare();
 
 	ivec2 sz = ivec2(m_txSceneColor->getWidth(), m_txSceneColor->getHeight());
-	sz.x = max(sz.x >> *m_downsample, 1);
-	sz.y = max(sz.y >> *m_downsample, 1);
+	sz.x = max(sz.x >> m_downsample, 1);
+	sz.y = max(sz.y >> m_downsample, 1);
 	m_txFeatures = Texture::Create2d(sz.x, sz.y, m_txSceneColor->getFormat());
 	m_txFeatures->setName("txFeatures");
 	m_txFeatures->setWrap(GL_CLAMP_TO_EDGE);
