@@ -10,6 +10,7 @@
 
 	References:
 	(1) http://ivizlab.sfu.ca/papers/cgf2012.pdf (separable shaped blur)
+	(2) http://sebastien.hillaire.free.fr/index.php?option=com_content&view=article&id=71&Itemid=105 (Hexagonal Blur, Hilaire)
 */
 
 #pragma once
