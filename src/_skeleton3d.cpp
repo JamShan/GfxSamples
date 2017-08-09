@@ -18,9 +18,21 @@
 using namespace frm;
 using namespace apt;
 
-static App_skeleton3d s_inst;
+static _skeleton3d s_inst;
 
-bool App_skeleton3d::init(const apt::ArgList& _args)
+_skeleton3d::_skeleton3d()
+	: AppBase("_skeleton3d") 
+{
+	PropertyGroup& propGroup = m_props.addGroup("_skeleton3d");
+	//                  name             default            min     max    storage
+	//propGroup.addFloat  ("Float",        0.0f,              0.0f,   1.0f,  &foo);
+}
+
+_skeleton3d::~_skeleton3d()
+{
+}
+
+bool _skeleton3d::init(const apt::ArgList& _args)
 {
 	if (!AppBase::init(_args)) {
 		return false;
@@ -31,14 +43,14 @@ bool App_skeleton3d::init(const apt::ArgList& _args)
 	return true;
 }
 
-void App_skeleton3d::shutdown()
+void _skeleton3d::shutdown()
 {
 	// sample code here
 
 	AppBase::shutdown();
 }
 
-bool App_skeleton3d::update()
+bool _skeleton3d::update()
 {
 	if (!AppBase::update()) {
 		return false;
@@ -49,7 +61,7 @@ bool App_skeleton3d::update()
 	return true;
 }
 
-void App_skeleton3d::draw()
+void _skeleton3d::draw()
 {
 	// sample code here
 

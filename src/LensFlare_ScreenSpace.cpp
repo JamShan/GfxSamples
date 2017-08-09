@@ -26,6 +26,8 @@ LensFlare_ScreenSpace::LensFlare_ScreenSpace()
 	propGroup.addInt  ("Downsample",            1,             0,      8,       &m_downsample);
 	propGroup.addInt  ("Ghost Count",           4,             0,      32,      &m_downsample);
 	propGroup.addFloat("Ghost Spacing",         0.1f,          0.0f,   2.0f,    &m_ghostSpacing);
+
+	m_colorCorrection.setProps(m_props);
 }
 
 LensFlare_ScreenSpace::~LensFlare_ScreenSpace()
@@ -43,7 +45,7 @@ bool LensFlare_ScreenSpace::init(const apt::ArgList& _args)
 
 	bool ret = m_shEnvMap && m_shFeatures;
 
-	ret &= m_colorCorrection.init(m_props);
+	ret &= m_colorCorrection.init();
 	ret &= initScene();
 	ret &= initLensFlare();	
 

@@ -23,7 +23,7 @@ void main()
 		s = (s - 0.5) * 0.1;
 		
 		float weight = length(vec2(0.5) - offset) / length(vec2(0.5));
-		weight = Remap(0.1, 0.5, weight);
+		weight = linearstep(0.1, 0.5, weight);
 	
 		ret += s * weight;
 	}

@@ -1,15 +1,15 @@
 #pragma once
-#ifndef App_skeleton_h
-#define App_skeleton_h
+#ifndef _skeleton_h
+#define _skeleton_h
 
 #include <frm/AppSample.h>
 
-class App_skeleton: public frm::AppSample
+class _skeleton: public frm::AppSample
 {
 	typedef AppSample AppBase;
 public:
-	App_skeleton(): AppBase("_skeleton") {}
-	virtual ~App_skeleton() {}
+	_skeleton();
+	virtual ~_skeleton();
 
 	virtual bool init(const apt::ArgList& _args) override;
 	virtual void shutdown() override;
@@ -21,4 +21,4 @@ protected:
 };
 
 
-#endif // App_skeleton_h
+#endif // _skeleton_h

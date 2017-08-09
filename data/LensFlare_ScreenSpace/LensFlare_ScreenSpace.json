@@ -1,0 +1,36 @@
+{
+	"Lens Flare": {
+		"Ghost Spacing": 0.10000000149011612,
+		"Downsample": 4,
+		"Ghost Count": 4
+	},
+	"AppSample": {
+		"Vsync Mode": 0,
+		"Show Shader Viewer": false,
+		"GlVersion": [4, 5],
+		"Show Menu": false,
+		"Show Profiler": false,
+		"Show Property Editor": false,
+		"Show Texture Viewer": false,
+		"GlCompatibility": false,
+		"Show Log": false,
+		"WindowSize": [-1, -1],
+		"Resolution": [-1, -1]
+	},
+	"AppSample3d": {
+		"Scene Path": "Scene.json",
+		"Show Helpers": true,
+		"Show Scene Editor": false
+	},
+	"Color Correction": {
+		"Saturation": 1.0,
+		"Tint": [1.0, 1.0, 1.0],
+		"Highlights": 0.0,
+		"Enabled": true,
+		"Shadows": 0.0,
+		"Exposure": 0.0,
+		"Auto Exposure Clamp": 16.0,
+		"Contrast": 1.0,
+		"Tonemapper": [1.0, 1.0, 0.125, 0.30000001192092898]
+	}
+}

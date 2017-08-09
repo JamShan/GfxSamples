@@ -42,14 +42,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Win64|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\</OutDir>
-    <IntDir>obj\Win64\Debug\</IntDir>
+    <IntDir>obj\Win64\Debug\LensFlare_ScreenSpace\</IntDir>
     <TargetName>LensFlare_ScreenSpace_debug</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Win64|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\</OutDir>
-    <IntDir>obj\Win64\Release\</IntDir>
+    <IntDir>obj\Win64\Release\LensFlare_ScreenSpace\</IntDir>
     <TargetName>LensFlare_ScreenSpace</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
@@ -57,11 +57,14 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>APT_DEBUG;FRM_DEBUG;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\extern\GfxSampleFramework\src\all;..\..\extern\GfxSampleFramework\src\all\extern;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all\extern;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EA_COMPILER_NO_EXCEPTIONS;APT_DEBUG;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all\extern;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\win;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\win\extern;..\..\extern\GfxSampleFramework\src\all;..\..\extern\GfxSampleFramework\src\all\extern;..\..\extern\GfxSampleFramework\src\win;..\..\extern\GfxSampleFramework\src\win\extern;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -70,8 +73,7 @@
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>rmdir "$(ProjectDir)..\..\bin\common"
-mklink /j "$(ProjectDir)..\..\bin\common" "$(ProjectDir)..\../extern/GfxSampleFramework/data\common"
+      <Command>mkdir "$(ProjectDir)..\..\data\LensFlare_ScreenSpace"
 rmdir "$(ProjectDir)..\..\bin\LensFlare_ScreenSpace"
 mklink /j "$(ProjectDir)..\..\bin\LensFlare_ScreenSpace" "$(ProjectDir)..\..\data\LensFlare_ScreenSpace"</Command>
     </PostBuildEvent>
@@ -80,8 +82,8 @@ mklink /j "$(ProjectDir)..\..\bin\LensFlare_ScreenSpace" "$(ProjectDir)..\..\dat
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\extern\GfxSampleFramework\src\all;..\..\extern\GfxSampleFramework\src\all\extern;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all\extern;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EA_COMPILER_NO_EXCEPTIONS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all\extern;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\win;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\win\extern;..\..\extern\GfxSampleFramework\src\all;..\..\extern\GfxSampleFramework\src\all\extern;..\..\extern\GfxSampleFramework\src\win;..\..\extern\GfxSampleFramework\src\win\extern;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -89,6 +91,9 @@ mklink /j "$(ProjectDir)..\..\bin\LensFlare_ScreenSpace" "$(ProjectDir)..\..\dat
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -99,8 +104,7 @@ mklink /j "$(ProjectDir)..\..\bin\LensFlare_ScreenSpace" "$(ProjectDir)..\..\dat
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>rmdir "$(ProjectDir)..\..\bin\common"
-mklink /j "$(ProjectDir)..\..\bin\common" "$(ProjectDir)..\../extern/GfxSampleFramework/data\common"
+      <Command>mkdir "$(ProjectDir)..\..\data\LensFlare_ScreenSpace"
 rmdir "$(ProjectDir)..\..\bin\LensFlare_ScreenSpace"
 mklink /j "$(ProjectDir)..\..\bin\LensFlare_ScreenSpace" "$(ProjectDir)..\..\data\LensFlare_ScreenSpace"</Command>
     </PostBuildEvent>
@@ -116,7 +120,7 @@ mklink /j "$(ProjectDir)..\..\bin\LensFlare_ScreenSpace" "$(ProjectDir)..\..\dat
     <ProjectReference Include="..\..\extern\GfxSampleFramework\extern\ApplicationTools\build\vs2015\ApplicationTools.vcxproj">
       <Project>{6ADD11F4-56D6-3046-7F08-16CB6B601052}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\extern\GfxSampleFramework\build\vs2015\framework.vcxproj">
+    <ProjectReference Include="GfxSampleFramework.vcxproj">
       <Project>{33827CC1-9FEC-3038-E82A-E2DD54D40E8D}</Project>
     </ProjectReference>
   </ItemGroup>

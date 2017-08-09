@@ -15,9 +15,21 @@
 using namespace frm;
 using namespace apt;
 
-static App_skeleton s_inst;
+static _skeleton s_inst;
 
-bool App_skeleton::init(const apt::ArgList& _args)
+_skeleton::_skeleton()
+	: AppBase("_skeleton") 
+{
+	PropertyGroup& propGroup = m_props.addGroup("_skeleton");
+	//                  name             default            min     max    storage
+	//propGroup.addFloat  ("Float",        0.0f,              0.0f,   1.0f,  &foo);
+}
+
+_skeleton::~_skeleton()
+{
+}
+
+bool _skeleton::init(const apt::ArgList& _args)
 {
 	if (!AppBase::init(_args)) {
 		return false;
@@ -28,14 +40,14 @@ bool App_skeleton::init(const apt::ArgList& _args)
 	return true;
 }
 
-void App_skeleton::shutdown()
+void _skeleton::shutdown()
 {
 	// sample code here
 
 	AppBase::shutdown();
 }
 
-bool App_skeleton::update()
+bool _skeleton::update()
 {
 	if (!AppBase::update()) {
 		return false;
@@ -46,7 +58,7 @@ bool App_skeleton::update()
 	return true;
 }
 
-void App_skeleton::draw()
+void _skeleton::draw()
 {
 	// sample code here
 
