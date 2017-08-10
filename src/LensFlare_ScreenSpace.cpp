@@ -40,7 +40,8 @@ bool LensFlare_ScreenSpace::init(const apt::ArgList& _args)
 		return false;
 	}
 
-	m_shEnvMap = Shader::CreateVsFs("shaders/Envmap_vs.glsl", "shaders/Envmap_fs.glsl", "ENVMAP_CUBE\0");
+	m_shEnvMap = Shader::CreateVsFs("shaders/Envmap_vs.glsl", "shaders/Envmap_fs.glsl", "ENVMAP_SPHERE\0");
+	m_shDownsample = Shader::CreateCs("shaders/Downsample_cs.glsl", 8, 8);
 	m_shFeatures = Shader::CreateVsFs("shaders/Basic_vs.glsl", "shaders/Features_fs.glsl");
 
 	bool ret = m_shEnvMap && m_shFeatures;
@@ -93,10 +94,37 @@ void LensFlare_ScreenSpace::draw()
 		ctx->setShader(m_shEnvMap);
 		ctx->bindTexture("txEnvmap", m_txEnvmap);
 		ctx->drawNdcQuad(cam);
-	
-	// \todo perform this manually (compute shader?) - experiment with average vs. max luminance
-		AUTO_MARKER("Downsample");
+	}
+	 
+ // downsample
+	{	AUTO_MARKER("Downsample");
+			
+
+	#if 0
 		m_txSceneColor->generateMipmap();
+
+	#else		
+		const int localX = m_shDownsample->getLocalSize().x;
+		const int localY = m_shDownsample->getLocalSize().y;
+		int w = m_txSceneColor->getWidth() >> 1;
+		int h = m_txSceneColor->getHeight() >> 1;
+		int lvl = 0;
+		m_txSceneColor->setMinFilter(GL_LINEAR_MIPMAP_NEAREST); // no filtering between mips
+		while (w >= 1 && h >= 1) {
+			ctx->setShader  (m_shDownsample); // force reset bindings
+			ctx->setUniform ("uSrcLevel", lvl);
+			ctx->bindTexture("txSrc", m_txSceneColor);
+			ctx->bindImage  ("txDst", m_txSceneColor, GL_WRITE_ONLY, ++lvl);
+			ctx->dispatch(
+				max((w + localX - 1) / localX, 1),
+				max((h + localY - 1) / localY, 1)
+				);
+			glAssert(glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT));
+			w = w >> 1;
+			h = h >> 1;
+		}
+		m_txSceneColor->setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+	#endif
 	}
 
  // lens flare
@@ -131,7 +159,7 @@ bool LensFlare_ScreenSpace::initScene()
 	m_txSceneDepth->setName("txSceneDepth");
 	m_txSceneDepth->setWrap(GL_CLAMP_TO_EDGE);
 	m_fbScene = Framebuffer::Create(2, m_txSceneColor, m_txSceneDepth);
-	m_txEnvmap = Texture::CreateCubemap2x3("textures/diacourt_cube2x3.hdr");
+	m_txEnvmap = Texture::Create("textures/factory.env.hdr");
 	
 	bool ret = m_txSceneColor && m_txSceneDepth && m_txEnvmap;
 

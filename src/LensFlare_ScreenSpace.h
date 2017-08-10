@@ -51,6 +51,7 @@ public:
 	int                 m_downsample;
 	int                 m_ghostCount;
 	float               m_ghostSpacing;
+	frm::Shader*        m_shDownsample;
 	frm::Shader*        m_shFeatures;
 	frm::Texture*       m_txFeatures;
 	frm::Framebuffer*   m_fbFeatures;
