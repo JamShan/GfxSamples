@@ -166,7 +166,6 @@ mklink /j "$(ProjectDir)../../bin/common" "$(ProjectDir)../../extern/GfxSampleFr
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Resource.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Scene.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Shader.h" />
-    <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\ShaderPreprocessor.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\SkeletonAnimation.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Spline.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Texture.h" />
@@ -243,7 +242,6 @@ mklink /j "$(ProjectDir)../../bin/common" "$(ProjectDir)../../extern/GfxSampleFr
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Resource.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Scene.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Shader.cpp" />
-    <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\ShaderPreprocessor.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\SkeletonAnimation.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\SkeletonAnimation_md5.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Spline.cpp" />
