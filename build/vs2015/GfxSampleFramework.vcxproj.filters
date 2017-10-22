@@ -16,6 +16,9 @@
     <Filter Include="extern\lua">
       <UniqueIdentifier>{ACC78AE6-987F-CC33-0187-A58FED5D6724}</UniqueIdentifier>
     </Filter>
+    <Filter Include="extern\tinyobjloader">
+      <UniqueIdentifier>{00583F7B-ECE6-C844-9505-DD3F8173D9EA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="ui">
       <UniqueIdentifier>{C3795900-AF05-880B-18B4-880B045F880B}</UniqueIdentifier>
     </Filter>
@@ -141,14 +144,15 @@
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\extern\md5mesh.h">
       <Filter>extern</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\extern\tiny_obj_loader.h">
-      <Filter>extern</Filter>
+    <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\extern\tinyobjloader\tiny_obj_loader.h">
+      <Filter>extern\tinyobjloader</Filter>
     </ClInclude>
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\App.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\AppSample.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\AppSample3d.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Buffer.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Camera.h" />
+    <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Curve.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Framebuffer.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\GlContext.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Input.h" />
@@ -166,7 +170,6 @@
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Spline.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Texture.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\TextureAtlas.h" />
-    <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\ValueCurve.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Window.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\XForm.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\def.h" />
@@ -302,6 +305,7 @@
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\AppSample3d.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Buffer.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Camera.cpp" />
+    <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Curve.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Framebuffer.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\GlContext.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Input.cpp" />
@@ -323,7 +327,6 @@
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Spline.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Texture.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\TextureAtlas.cpp" />
-    <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\ValueCurve.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Window.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\XForm.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\geom.cpp" />
