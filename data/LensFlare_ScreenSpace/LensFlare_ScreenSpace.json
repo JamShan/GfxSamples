@@ -1,17 +1,17 @@
 {
 	"Lens Flare": {
 		"Ghost Spacing": 0.4000000059604645,
-		"Halo Aspect Ratio": 0.7300000190734863,
+		"Halo Aspect Ratio": 0.6000000238418579,
 		"Downsample": 2,
-		"Ghost Count": 4,
+		"Ghost Count": 5,
 		"Global Brightness": 0.05000000074505806,
 		"Blur Size": 12,
 		"Halo Radius": 0.6000000238418579,
 		"Lens Flare Only": false,
-		"Halo Threshold": 6.0,
-		"Sphere Color": [10.0, 10.0, 10.0],
-		"Chromatic Aberration": 0.004000000189989805,
-		"Blur Step": 2.0,
+		"Halo Threshold": 9.0,
+		"Features Only": false,
+		"Chromatic Aberration": 0.003000000026077032,
+		"Blur Step": 1.5,
 		"Ghost Threshold": 9.0
 	},
 	"AppSample": {

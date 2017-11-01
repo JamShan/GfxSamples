@@ -42,9 +42,6 @@ public:
 	frm::Texture*     m_txSceneColor;
 	frm::Texture*     m_txSceneDepth;
 	frm::Framebuffer* m_fbScene;
-	frm::Shader*      m_shSphere;
-	frm::Mesh*        m_msSphere;
-	frm::vec3         m_sphereColor;
 	frm::Shader*      m_shEnvMap;
 	frm::Texture*     m_txEnvmap;
 	frm::Shader*      m_shColorCorrection;
@@ -55,6 +52,7 @@ public:
 
  // lens flare
 	bool                m_showLensFlareOnly;
+	bool                m_showFeaturesOnly;
 	int                 m_downsample;
 	int                 m_ghostCount;
 	float               m_ghostSpacing;
@@ -68,6 +66,7 @@ public:
 	float               m_blurStep;
 	float               m_globalBrightness;
 	frm::Texture*       m_txLensDirt;
+	frm::Texture*       m_txStarburst;
 	frm::Shader*        m_shDownsample;
 	frm::Shader*        m_shFeatures;
 	frm::Shader*        m_shBlur;

@@ -147,12 +147,13 @@ mklink /j "$(ProjectDir)../../bin/common" "$(ProjectDir)../../extern/GfxSampleFr
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\extern\lua\lvm.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\extern\lua\lzio.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\extern\md5mesh.h" />
-    <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\extern\tiny_obj_loader.h" />
+    <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\extern\tinyobjloader\tiny_obj_loader.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\App.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\AppSample.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\AppSample3d.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Buffer.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Camera.h" />
+    <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Curve.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Framebuffer.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\GlContext.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Input.h" />
@@ -170,7 +171,6 @@ mklink /j "$(ProjectDir)../../bin/common" "$(ProjectDir)../../extern/GfxSampleFr
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Spline.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Texture.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\TextureAtlas.h" />
-    <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\ValueCurve.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\Window.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\XForm.h" />
     <ClInclude Include="..\..\extern\GfxSampleFramework\src\all\frm\def.h" />
@@ -226,6 +226,7 @@ mklink /j "$(ProjectDir)../../bin/common" "$(ProjectDir)../../extern/GfxSampleFr
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\AppSample3d.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Buffer.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Camera.cpp" />
+    <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Curve.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Framebuffer.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\GlContext.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Input.cpp" />
@@ -247,7 +248,6 @@ mklink /j "$(ProjectDir)../../bin/common" "$(ProjectDir)../../extern/GfxSampleFr
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Spline.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Texture.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\TextureAtlas.cpp" />
-    <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\ValueCurve.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\Window.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\XForm.cpp" />
     <ClCompile Include="..\..\extern\GfxSampleFramework\src\all\frm\geom.cpp" />

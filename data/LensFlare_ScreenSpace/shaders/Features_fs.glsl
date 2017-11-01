@@ -24,6 +24,15 @@ uniform float     uChromaticAberration;
 
 layout(location=0) out vec3 fResult;
 
+// http://www.iquilezles.org/www/articles/functions/functions.htm	
+float cubicPulse( float x, float c, float w )
+{
+    x = abs(x - c);
+    if( x>w ) return 0.0;
+    x /= w;
+    return 1.0 - x*x*(3.0-2.0*x);
+}
+
 vec3 ApplyThreshold(in vec3 _rgb, in float _threshold)
 {
 	return _rgb * smoothstep(vec3(_threshold), vec3(_threshold + 4.0), _rgb); 
@@ -90,8 +99,8 @@ vec3 GenerateHalo(in vec2 _uv, in float _radius, in float _aspectRatio, in float
 		float haloWeight = GetUvDistanceToCenter((_uv - vec2(0.5, 0.0)) / vec2(_aspectRatio, 1.0) + vec2(0.5, 0.0)); 
 	#endif
 	haloVec *= _radius;
-	haloWeight = smoothstep(0.3, 1.0, haloWeight); // halo effect breaks down towards the centre, 
-	
+	haloWeight = cubicPulse(haloWeight, _radius, 0.3); // \todo parameterize thickness
+
 	return ApplyThreshold(SampleSceneColor(_uv + haloVec), _threshold) * haloWeight;
 }
 
