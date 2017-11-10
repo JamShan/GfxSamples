@@ -49,6 +49,7 @@ vec3 SampleSceneColor(in vec2 _uv)
 #if DISABLE_CHROMATIC_ABERRATION
 	return textureLod(txSceneColor, _uv, uDownsample).rgb;
 #else
+#error TODO scale offset by ditsance of uv to center
 	vec2 offset = normalize(vec2(0.5) - _uv) * uChromaticAberration;
 	return vec3(
 		textureLod(txSceneColor, _uv + offset, uDownsample).r,
