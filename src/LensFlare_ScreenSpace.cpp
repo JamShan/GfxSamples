@@ -168,8 +168,8 @@ void LensFlare_ScreenSpace::draw()
 			ctx->bindTexture("txSrc", m_txSceneColor);
 			ctx->bindImage("txDst", m_txSceneColor, GL_WRITE_ONLY, ++lvl);
 			ctx->dispatch(
-				max((w + localX - 1) / localX, 1),
-				max((h + localY - 1) / localY, 1)
+				APT_MAX((w + localX - 1) / localX, 1),
+				APT_MAX((h + localY - 1) / localY, 1)
 				);
 			glAssert(glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT));
 			w = w >> 1;
@@ -261,7 +261,7 @@ bool LensFlare_ScreenSpace::initScene()
 	m_txSceneDepth->setWrap(GL_CLAMP_TO_EDGE);
 	m_fbScene = Framebuffer::Create(2, m_txSceneColor, m_txSceneDepth);
 
-	m_txEnvmap = Texture::Create("textures/env_factory.dds");
+	m_txEnvmap = Texture::Create("textures/env_papermill.dds");
 	m_shEnvMap = Shader::CreateVsFs("shaders/Envmap_vs.glsl", "shaders/Envmap_fs.glsl", "ENVMAP_CUBE\0");
 	
 	return true;
@@ -282,8 +282,8 @@ bool LensFlare_ScreenSpace::initLensFlare()
 	shutdownLensFlare();
 
 	ivec2 sz = ivec2(m_txSceneColor->getWidth(), m_txSceneColor->getHeight());
-	sz.x = max(sz.x >> m_downsample, 1);
-	sz.y = max(sz.y >> m_downsample, 1);
+	sz.x = APT_MAX(sz.x >> m_downsample, 1);
+	sz.y = APT_MAX(sz.y >> m_downsample, 1);
 	m_txFeatures[0] = Texture::Create2d(sz.x, sz.y, m_txSceneColor->getFormat());
 	m_txFeatures[0]->setName("txFeatures");
 	m_txFeatures[0]->setWrap(GL_CLAMP_TO_EDGE);
