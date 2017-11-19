@@ -285,15 +285,11 @@ bool LensFlare_ScreenSpace::initLensFlare()
 	sz.x = max(sz.x >> m_downsample, 1);
 	sz.y = max(sz.y >> m_downsample, 1);
 	m_txFeatures[0] = Texture::Create2d(sz.x, sz.y, m_txSceneColor->getFormat());
-	if (!m_txFeatures[0]) return false;
 	m_txFeatures[0]->setName("txFeatures");
 	m_txFeatures[0]->setWrap(GL_CLAMP_TO_EDGE);
-
 	m_txFeatures[1] = Texture::Create(m_txFeatures[0], false);
 	m_txFeatures[1]->setWrap(GL_CLAMP_TO_EDGE);
-
 	m_fbFeatures = Framebuffer::Create(1, m_txFeatures[0]);
-	if (!m_fbFeatures) return false;
 
 	return true;
 }

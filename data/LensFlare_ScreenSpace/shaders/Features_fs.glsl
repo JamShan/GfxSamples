@@ -35,7 +35,7 @@ float cubicPulse( float x, float c, float w )
 
 vec3 ApplyThreshold(in vec3 _rgb, in float _threshold)
 {
-	return _rgb * smoothstep(vec3(_threshold), vec3(_threshold + 4.0), _rgb); 
+	return max(_rgb - vec3(_threshold), vec3(0.0));
 }
 
 float GetUvDistanceToCenter(in vec2 _uv)
@@ -62,17 +62,16 @@ vec3 GenerateGhosts(in vec2 _uv, in float _threshold)
 	vec3 ret = vec3(0.0);
 	vec2 ghostVec = (vec2(0.5) - _uv) * uGhostSpacing;	
 	for (int i = 0; i < uGhostCount; ++i) {
-		vec2 offset = fract(_uv + ghostVec * vec2(i));
+		vec2 suv = fract(_uv + ghostVec * vec2(i));
 		
-		vec3 s = SampleSceneColor(offset);
-		s = ApplyThreshold(s, _threshold);
-		
-		float distanceToCenter = GetUvDistanceToCenter(offset);
+		float distanceToCenter = GetUvDistanceToCenter(suv);
 		
 	 // reduce contributions from samples at the screen edge
 	 // \todo power function is nicer here, need a cheap fit
-		float weight = 1.0 - smoothstep(0.0, 0.75, distanceToCenter);
-		
+		float weight = 1.0 - smoothstep(0.0, 0.25, distanceToCenter);
+
+		vec3 s = SampleSceneColor(suv);
+		s = ApplyThreshold(s, _threshold);
 		#if GHOST_COLOR_PER_SAMPLE
 			s *= textureLod(txGhostColorGradient, vec2(distanceToCenter, 0.5), 0.0).rgb;
 		#endif
@@ -106,7 +105,7 @@ vec3 GenerateHalo(in vec2 _uv, in float _radius, in float _aspectRatio, in float
 
 void main() 
 {
-	vec2 uv = vec2(1.0) - vUv;
+	vec2 uv = vec2(1.0) - vUv; // flip texcoords to separate the result from the source image
 	vec3 ret = vec3(0.0);
 	
 	ret += GenerateGhosts(uv, uGhostThreshold);
