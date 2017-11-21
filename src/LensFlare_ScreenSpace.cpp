@@ -261,7 +261,7 @@ bool LensFlare_ScreenSpace::initScene()
 	m_txSceneDepth->setWrap(GL_CLAMP_TO_EDGE);
 	m_fbScene = Framebuffer::Create(2, m_txSceneColor, m_txSceneDepth);
 
-	m_txEnvmap = Texture::Create("textures/env_papermill.dds");
+	m_txEnvmap = Texture::Create("textures/env_factory.dds");
 	m_shEnvMap = Shader::CreateVsFs("shaders/Envmap_vs.glsl", "shaders/Envmap_fs.glsl", "ENVMAP_CUBE\0");
 	
 	return true;

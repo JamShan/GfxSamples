@@ -1,19 +1,4 @@
-/*	Screen space 'pseudo' lens flare.
-
-	(1) Downsample
-		- Usually already exists as an input for other post processing effects; downsample into the mip chain of the lighting buffer.
-		- Can use previous frame's result and therefore move steps 2 and 3 to async compute.
-
-	(2) Feature generation
-		- Ghost gradient color works better if you sample inside the sample loop.
-
-	(3) Blur
-
-	(4) Upscale/composite
-
-	References:
-	(1) http://ivizlab.sfu.ca/papers/cgf2012.pdf (separable shaped blur)
-	(2) http://sebastien.hillaire.free.fr/index.php?option=com_content&view=article&id=71&Itemid=105 (Hexagonal Blur, Hilaire)
+/*	Screen space lens flare.
 */
 
 #pragma once
