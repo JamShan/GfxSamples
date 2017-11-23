@@ -44,6 +44,7 @@ public:
 	float               m_ghostThreshold;
 	frm::Texture*       m_txGhostColorGradient;
 	float               m_haloRadius;
+	float               m_haloThickness;
 	float               m_haloThreshold;
 	float               m_haloAspectRatio;
 	float               m_chromaticAberration;

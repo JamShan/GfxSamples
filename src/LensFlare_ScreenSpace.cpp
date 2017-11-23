@@ -34,6 +34,7 @@ LensFlare_ScreenSpace::LensFlare_ScreenSpace()
 	propGroup.addFloat ("Ghost Spacing",         0.1f,          0.0f,   2.0f,    &m_ghostSpacing);
 	propGroup.addFloat ("Ghost Threshold",       2.0f,          0.0f,   20.0f,   &m_ghostThreshold);
 	propGroup.addFloat ("Halo Radius",           0.6f,          0.0f,   2.0f,    &m_haloRadius);
+	propGroup.addFloat ("Halo Thickneess",       0.1f,          0.0f,   0.4f,    &m_haloThickness);
 	propGroup.addFloat ("Halo Threshold",        2.0f,          0.0f,   20.0f,   &m_haloThreshold);
 	propGroup.addFloat ("Halo Aspect Ratio",     1.0f,          0.0f,   2.0f,    &m_haloAspectRatio);
 	propGroup.addInt   ("Blur Size",             16,            1,      64,      &m_blurSize);
@@ -117,6 +118,7 @@ bool LensFlare_ScreenSpace::update()
 		
 		ImGui::Spacing();
 		ImGui::SliderFloat("Halo Radius", &m_haloRadius, 0.0f, 2.0f);
+		ImGui::SliderFloat("Halo Thickness", &m_haloThickness, 0.0f, 0.4f);
 		ImGui::SliderFloat("Halo Threshold", &m_haloThreshold, 0.0f, 20.0f);
 		ImGui::SliderFloat("Halo Aspect Ratio", &m_haloAspectRatio, 0.0f, 2.0f);
 
@@ -190,6 +192,7 @@ void LensFlare_ScreenSpace::draw()
 			ctx->setUniform("uGhostSpacing",        m_ghostSpacing);
 			ctx->setUniform("uGhostThreshold",      m_ghostThreshold);
 			ctx->setUniform("uHaloRadius",          m_haloRadius);
+			ctx->setUniform("uHaloThickness",       m_haloThickness);
 			ctx->setUniform("uHaloThreshold",       m_haloThreshold);
 			ctx->setUniform("uHaloAspectRatio",     m_haloAspectRatio);
 			ctx->setUniform("uChromaticAberration", m_chromaticAberration);

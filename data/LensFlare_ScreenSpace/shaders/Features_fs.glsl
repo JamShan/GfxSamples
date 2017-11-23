@@ -1,9 +1,9 @@
 #include "shaders/def.glsl"
+#include "shaders/WindowFunctions.glsl"
 
-#define GHOST_TINT_PER_SAMPLE         1  // Apply txGhostGradientColor inside the sample loop instead of at the end.
+#define GHOST_TINT_PER_SAMPLE          1  // Apply txGhostGradientColor inside the sample loop instead of at the end.
 #define DISABLE_HALO_ASPECT_RATIO      0  // Code is simpler/cheaper without this, but the halo shape is fixed.
 #define DISABLE_CHROMATIC_ABERRATION   0  // Takes 3x fewer samples.
-
 
 noperspective in vec2 vUv;
 
@@ -17,21 +17,13 @@ uniform float     uGhostThreshold;
 uniform sampler2D txGhostColorGradient;
 
 uniform float     uHaloRadius;
+uniform float     uHaloThickness;
 uniform float     uHaloThreshold;
 uniform float     uHaloAspectRatio;
 
 uniform float     uChromaticAberration;
 
 layout(location=0) out vec3 fResult;
-
-// http://www.iquilezles.org/www/articles/functions/functions.htm
-float cubicPulse( float x, float c, float w )
-{
-    x = abs(x - c);
-    if( x>w ) return 0.0;
-    x /= w;
-    return 1.0 - x*x*(3.0-2.0*x);
-}
 
 vec3 ApplyThreshold(in vec3 _rgb, in float _threshold)
 {
@@ -52,7 +44,7 @@ vec3 SampleSceneColor(in vec2 _uv)
 #endif
 }
 
-vec3 GenerateGhosts(in vec2 _uv, in float _threshold)
+vec3 SampleGhosts(in vec2 _uv, in float _threshold)
 {
 	vec3 ret = vec3(0.0);
 	vec2 ghostVec = (vec2(0.5) - _uv) * uGhostSpacing;
@@ -80,7 +72,7 @@ vec3 GenerateGhosts(in vec2 _uv, in float _threshold)
 	return ret;
 }
 
-vec3 GenerateHalo(in vec2 _uv, in float _radius, in float _aspectRatio, in float _threshold)
+vec3 SampleHalo(in vec2 _uv, in float _radius, in float _aspectRatio, in float _threshold)
 {
 	vec2 haloVec = vec2(0.5) - _uv;
 	#if DISABLE_HALO_ASPECT_RATIO
@@ -94,8 +86,7 @@ vec3 GenerateHalo(in vec2 _uv, in float _radius, in float _aspectRatio, in float
 		float haloWeight = distance(wuv, vec2(0.5));
 	#endif
 	haloVec *= _radius;
-	haloWeight = cubicPulse(haloWeight, _radius, 0.2); // \todo parameterize thickness
-
+	haloWeight = Window_Cubic(haloWeight, _radius, uHaloThickness);
 	return ApplyThreshold(SampleSceneColor(_uv + haloVec), _threshold) * haloWeight;
 }
 
@@ -104,8 +95,9 @@ void main()
 	vec2 uv = vec2(1.0) - vUv; // flip the texture coordinates
 	vec3 ret = vec3(0.0);
 
-	ret += GenerateGhosts(uv, uGhostThreshold);
-	ret += GenerateHalo(uv, uHaloRadius, uHaloAspectRatio, uHaloThreshold);
+	ret += SampleGhosts(uv, uGhostThreshold);
+	ret += SampleHalo(uv, uHaloRadius, uHaloAspectRatio, uHaloThreshold);
+
 	
 	fResult = ret;
 }
