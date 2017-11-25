@@ -255,7 +255,7 @@ bool LensFlare_ScreenSpace::initScene()
 {
 	shutdownScene();
 
-	m_txSceneColor = Texture::Create2d(m_resolution.x, m_resolution.y, GL_R11F_G11F_B10F, 99);
+	m_txSceneColor = Texture::Create2d(m_resolution.x, m_resolution.y, GL_RGBA16F, 99);
 	m_txSceneColor->setName("txSceneColor");
 	m_txSceneColor->setWrap(GL_CLAMP_TO_EDGE);
 	m_txSceneColor->setMinFilter(GL_LINEAR_MIPMAP_NEAREST);
