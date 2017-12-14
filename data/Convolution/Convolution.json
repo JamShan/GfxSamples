@@ -1,0 +1,22 @@
+{
+	"AppSample": {
+		"Vsync Mode": 0,
+		"Show Shader Viewer": false,
+		"GlVersion": [4, 5],
+		"Show Menu": false,
+		"Show Profiler": false,
+		"Show Property Editor": false,
+		"Show Texture Viewer": false,
+		"GlCompatibility": false,
+		"Show Log": false,
+		"WindowSize": [-1, -1],
+		"Resolution": [-1, -1]
+	},
+	"Convolution": {
+		"Show Kernel": true,
+		"Mode": 0,
+		"Gaussian Sigma": 1.0,
+		"Size": 5,
+		"Type": 0
+	}
+}
