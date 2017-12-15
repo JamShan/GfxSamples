@@ -4,9 +4,9 @@
 		"Show Shader Viewer": false,
 		"GlVersion": [4, 5],
 		"Show Menu": false,
-		"Show Profiler": false,
+		"Show Profiler": true,
 		"Show Property Editor": false,
-		"Show Texture Viewer": false,
+		"Show Texture Viewer": true,
 		"GlCompatibility": false,
 		"Show Log": false,
 		"WindowSize": [-1, -1],
@@ -14,9 +14,9 @@
 	},
 	"Convolution": {
 		"Show Kernel": true,
-		"Mode": 0,
-		"Gaussian Sigma": 1.0,
-		"Size": 5,
-		"Type": 0
+		"Mode": 1,
+		"Gaussian Sigma": 2.6500000953674318,
+		"Size": 11,
+		"Type": 1
 	}
 }

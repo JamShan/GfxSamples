@@ -27,11 +27,12 @@ protected:
 	int           m_type;
 	int           m_size;
 	float         m_gaussianSigma;
+	float         m_gaussianSigmaOptimal;
 	bool          m_showKernel;
 
+	int           m_kernelSize;
 	float*        m_weights;
 	float*        m_offsets;
-	frm::Buffer*  m_bfKernel;
 
 	void initKernel();
 	void shutdownKernel();

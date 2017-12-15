@@ -22,19 +22,18 @@ uniform image2D writeonly txDst;
 
 
 #if (MODE == Mode_2d)
-	layout(std140) uniform _bfKernel
-	{
-		float uWeights[KERNEL_SIZE * KERNEL_SIZE];
-		vec2  uOffsets[KERNEL_SIZE * KERNEL_SIZE];
-	};
+	#define OffsetType vec2
+	#define GetOffset(iuv, i) (iuv + uOffsets[i])
+
 #else
-	layout(std140) uniform _bfKernel
-	{
-		float uWeights[KERNEL_SIZE];
-		float uOffsets[KERNEL_SIZE];
-	};
-	uniform ivec2 uDirection;
+	#define OffsetType float
+	uniform vec2 uDirection;
+	#define GetOffset(iuv, i) (iuv + vec2(uOffsets[i]) * uDirection)
 #endif
+#define GetWeight(_i) (uWeights[_i])
+
+uniform float      uWeights[KERNEL_SIZE];
+uniform OffsetType uOffsets[KERNEL_SIZE];
 
 void main()
 {
@@ -42,15 +41,13 @@ void main()
 	if (any(greaterThanEqual(gl_GlobalInvocationID.xy, txSize))) {
 		return;
 	}
-	ivec2 iuv = ivec2(gl_GlobalInvocationID.xy);
-	
+	vec2 iuv = vec2(gl_GlobalInvocationID.xy) + vec2(0.5);
+	vec2 texelSize = 1.0 / vec2(txSize);
+
 	vec4 ret = vec4(0.0);
-	
-	#if (MODE == Mode_2d)
-	#elif (MODE == Mode_Separable)
-	#elif (MODE == Mode_SeparableBilinear)
-	
-	#endif
-	
+	for (int i = 0; i < KERNEL_SIZE; ++i) {
+		ret += textureLod(txSrc, GetOffset(iuv, i) * texelSize, 0.0) * GetWeight(i);
+	}
+
 	imageStore(txDst, ivec2(gl_GlobalInvocationID.xy), ret);
 }
