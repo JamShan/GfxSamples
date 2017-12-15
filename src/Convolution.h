@@ -24,13 +24,14 @@ protected:
 
 		Type_Count
 	};
-	int   m_type;
-	int   m_size;
-	float m_gaussianSigma;
-	bool  m_showKernel;
-	
-	float* m_weights;
-	float* m_offsets;
+	int           m_type;
+	int           m_size;
+	float         m_gaussianSigma;
+	bool          m_showKernel;
+
+	float*        m_weights;
+	float*        m_offsets;
+	frm::Buffer*  m_bfKernel;
 
 	void initKernel();
 	void shutdownKernel();
@@ -44,6 +45,10 @@ protected:
 		Mode_Count
 	};
 	int m_mode;
+
+	frm::Texture* m_txSrc;
+	frm::Texture* m_txDst[2];
+	frm::Shader*  m_shConvolution;
 };
 
 

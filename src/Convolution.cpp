@@ -39,6 +39,13 @@ bool Convolution::init(const apt::ArgList& _args)
 		return false;
 	}
 
+	m_txSrc = Texture::Create("textures/lena.png");
+	
+	for (uint i = 0; i < APT_ARRAY_COUNT(m_txDst); ++i) {
+		m_txDst[i] = Texture::Create2d(m_txSrc->getWidth(), m_txSrc->getHeight(), GL_RGBA8);
+		m_txDst[i]->setNamef("txDst[%d]", i);
+	}
+
 	initKernel();
 
 	return true;
@@ -47,6 +54,10 @@ bool Convolution::init(const apt::ArgList& _args)
 void Convolution::shutdown()
 {
 	shutdownKernel();
+
+	Texture::Release(m_txDst[0]);
+	Texture::Release(m_txDst[1]);
+	Texture::Release(m_txSrc);
 
 	AppBase::shutdown();
 }
@@ -130,30 +141,31 @@ void Convolution::initKernel()
 	const int kernelDims = m_mode == Mode_2d ? 2 : 1;
 	const int size = m_size * (kernelDims == 2 ? m_size : 1);
 	const int hsize = m_size / 2;
-	m_weights = new float[size];
-	m_offsets = new float[size * kernelDims]; // offsets are vec2 
 
+ // offsets
+	m_offsets = new float[size * kernelDims]; // offsets are vec2 for a 2d kernel
+	if (m_mode == Mode_2d) {
+		for (int i = 0; i < m_size; ++i) {
+			float y = (float)(i - hsize);
+			for (int j = 0; j < m_size; ++j) {
+				float x = (float)(j - hsize);
+				int k = (i * m_size + j);
+				m_offsets[k * 2] = x;
+				m_offsets[k * 2 + 1] = y;
+			}
+		}
+	} else {
+		for (int i = 0; i < m_size; ++i) {
+			m_offsets[i] = (float)(i - hsize);
+		}
+	}
+
+ // weights
+	m_weights = new float[size];
 	switch (m_type) {
 	case Type_Box:
-		if (m_mode == Mode_2d) {
-		 // 2d box filter
-			for (int i = 0; i < m_size; ++i) {
-				float y = (float)(i - hsize);
-				for (int j = 0; j < m_size; ++j) {
-					int k = (i * m_size + j);
-					float x = (float)(j - hsize);
-					m_weights[k] = 1.0f / (float)size;
-					m_offsets[k * 2] = x;
-					m_offsets[k * 2 + 1] = y;
-				}
-			}
-		} else {
-		 // 1d box filter
-			for (int i = 0; i < m_size; ++i) {
-				m_offsets[i] = (float)(i - hsize);
-				m_weights[i] = 1.0f / (float)size;
-			}
-
+		for (int i = 0; i < size; ++i) {
+			m_weights[i] = 1.0f / (float)size;
 		}
 		break;
 	case Type_Gaussian:
@@ -162,10 +174,31 @@ void Convolution::initKernel()
 		APT_ASSERT(false);
 		break;
 	};
+
+ // gpu buffer
+	int bfSize = (size + size * kernelDims) * sizeof(float);
+	float* bfData = new float[bfSize];
+	memcpy(bfData, m_weights, size * sizeof(float));
+	memcpy(bfData + size * sizeof(float), m_weights, size * kernelDims * sizeof(float));
+	m_bfKernel = Buffer::Create(GL_UNIFORM_BUFFER, bfSize, 0, bfData);
+	m_bfKernel->setName("_bfKernel");
+	delete[] bfData;
+
+ // shader
+	ShaderDesc shDesc;
+	shDesc.setPath(GL_COMPUTE_SHADER, "shaders/Convolution_cs.glsl");
+	shDesc.setLocalSize(8, 8);
+	shDesc.addDefine(GL_COMPUTE_SHADER, "TYPE", m_type);
+	shDesc.addDefine(GL_COMPUTE_SHADER, "MODE", m_mode);
+	shDesc.addDefine(GL_COMPUTE_SHADER, "KERNEL_SIZE", m_size);
+	m_shConvolution = Shader::Create(shDesc);
 }
 
 void Convolution::shutdownKernel()
 {
 	delete[] m_weights;
 	delete[] m_offsets;
+
+	Shader::Release(m_shConvolution);
+	Buffer::Destroy(m_bfKernel);
 }
