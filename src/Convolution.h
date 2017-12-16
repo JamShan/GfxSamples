@@ -29,8 +29,10 @@ protected:
 	float         m_gaussianSigma;
 	float         m_gaussianSigmaOptimal;
 	bool          m_showKernel;
+	bool          m_showKernelGraph;
 
 	int           m_kernelSize;
+	float         m_kernelSum;
 	float*        m_weights;
 	float*        m_offsets;
 

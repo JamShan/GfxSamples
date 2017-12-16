@@ -58,7 +58,7 @@ float GaussianIntegration_Trapezoid(float _mind, float _maxd, float _sigma, floa
 }
 
 
-void GaussianKernel1d(int _size, float _sigma, float* weights_)
+float GaussianKernel1d(int _size, float _sigma, float* weights_, bool _normalize = true)
 {
  // force _size to be odd
 	if (_size % 2 == 0) {
@@ -83,9 +83,11 @@ void GaussianKernel1d(int _size, float _sigma, float* weights_)
 	for (int i = 0; i < _size; ++i) {
 		weights_[i] /= sum;
 	}
+
+	return sum;
 }
 
-void GaussianKernel2d(int _size, float _sigma, float* weights_)
+float GaussianKernel2d(int _size, float _sigma, float* weights_, bool _normalize = true)
 {
  // force _size to be odd
 	if (_size % 2 == 0) {
@@ -93,19 +95,29 @@ void GaussianKernel2d(int _size, float _sigma, float* weights_)
 	}
 
  // generate first row
-	GaussianKernel1d(_size, _sigma, weights_);
+	GaussianKernel1d(_size, _sigma, weights_, false);
 	
  // derive subsequent rows from the first
+	float sum = 0.0f;
 	for (int i = 1; i < _size; ++i) {
 		for (int j = 0; j < _size; ++j) {
 			int k = i * _size + j;
 			weights_[k] = weights_[i] * weights_[j];
+			sum += weights_[k];
 		}
 	}
  // copy the first row from the last
 	for (int i = 0; i < _size; ++i) {
 		weights_[i] = weights_[(_size - 1) * _size + i];
+		sum += weights_[i];
 	}
+
+ // normalize
+	for (int i = 0; i < _size; ++i) {
+		weights_[i] /= sum;
+	}
+
+	return sum;
 }
 
 // Outputs are arrays of _size / 2 + 1
@@ -164,6 +176,7 @@ Convolution::Convolution()
 	propGroup.addInt   ("Size",             5,                 1,      21,          &m_size);
 	propGroup.addFloat ("Gaussian Sigma",   1.0f,              0.0f,   4.0f,        &m_gaussianSigma);
 	propGroup.addBool  ("Show Kernel",      false,                                  &m_showKernel);
+	propGroup.addBool  ("Show Graph",       false,                                  &m_showKernelGraph);
 	propGroup.addInt   ("Mode",             Mode_2d,           0,      Mode_Count,  &m_mode);
 }
 
@@ -222,21 +235,33 @@ bool Convolution::update()
 		reinitKernel |= ImGui::SliderFloat("Sigma", &m_gaussianSigma, 0.0f, 4.0f);
 		ImGui::Text("Optimal Sigma: %f", m_gaussianSigmaOptimal);
 	}
+	
+	if (reinitKernel) {
+		initKernel();
+	}
 
 	ImGui::Checkbox("Show Kernel", &m_showKernel);
 	if (m_showKernel) {
 		ImGui::Begin("Kernel", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+			String<128> clipboardStr;
+
 			ImGui::Text("Weights:");
 			int rows = m_mode == Mode_2d ? m_kernelSize : 1;
 			for (int i = 0; i < rows; ++i) {
-				String<64> rowStr;
+				String<128> rowStr;
 				for (int j = 0; j < m_kernelSize; ++j) {
 					int k = i * m_kernelSize + j;
 					rowStr.appendf("%1.4f   ", m_weights[k]);
+					clipboardStr.appendf("%f, ", m_weights[k]);
 				}
 				ImGui::Text((const char*)rowStr);
+				clipboardStr.appendf("\n");
+			}
+			if (ImGui::Button("Copy to Clipboard##Weights")) {
+				ImGui::SetClipboardText((const char*)clipboardStr);
 			}
 
+			clipboardStr.clear();
 			ImGui::Spacing();
 			ImGui::Text("Offsets:");
 			for (int i = 0; i < rows; ++i) {
@@ -245,18 +270,79 @@ bool Convolution::update()
 					int k = i * m_kernelSize + j;
 					if (m_mode == Mode_2d) {
 						rowStr.appendf("(%+1.4f, %+1.4f)   ", m_offsets[k * 2], m_offsets[k * 2 + 1]);
+						clipboardStr.appendf("(%f, %f), ", m_offsets[k * 2], m_offsets[k * 2 + 1]);
 					} else {
 						rowStr.appendf("%+1.4f   ", m_offsets[k]);
+						clipboardStr.appendf("%f, ", m_offsets[k]);
 					}
 				}
 				ImGui::Text((const char*)rowStr);
+				clipboardStr.appendf("\n");
+			}
+			if (ImGui::Button("Copy to Clipboard##Offsets")) {
+				ImGui::SetClipboardText((const char*)clipboardStr);
 			}
 		ImGui::End();
 	}
+	ImGui::Checkbox("Show Kernel Graph", &m_showKernelGraph);
+	if (m_showKernelGraph) {
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		vec2 graphBeg  = vec2(ImGui::GetCursorPos()) + vec2(ImGui::GetWindowPos());
+		vec2 graphSize = vec2(ImGui::GetContentRegionAvailWidth(), 200.0f);
+		vec2 graphEnd  = graphBeg + graphSize;
+		float graphScale = 1.0f;
 
-	if (reinitKernel) {
-		initKernel();
+		drawList->AddRectFilled(graphBeg, graphEnd, IM_COL32_BLACK);
+		ImGui::PushClipRect(graphBeg - vec2(1.0f), graphEnd + vec2(1.0f), true);
+		
+	 // sample the function directly
+		if (m_type == Type_Gaussian) {
+			graphScale = GaussianDistribution(0.0f, m_gaussianSigma, m_gaussianSigma * m_gaussianSigma) / m_kernelSum;
+			graphScale *= 2.0f;
+			const int directSampleCount = (int)graphSize.x / 4;
+			vec2 q = graphBeg + vec2(0.0f, graphSize.y);
+			for (int i = 0; i < directSampleCount; ++i) {
+				vec2 p;
+				p.x = (float)i / (float)directSampleCount;
+				float d = p.x * (float)m_size - (float)m_size * 0.5f;
+				p.y = GaussianDistribution(d, m_gaussianSigma, m_gaussianSigma * m_gaussianSigma) / m_kernelSum / graphScale;
+
+				p.x = graphBeg.x + p.x * graphSize.x;
+				p.y = graphEnd.y - p.y * graphSize.y;
+				drawList->AddLine(q, p, IM_COL32_MAGENTA);
+				q = p;
+			}
+		}
+
+	 // draw computed weights at offsets
+		const int offsetStride = (m_mode == Mode_2d) ? 2 : 1;
+		const float rectSize = graphSize.x / (float)m_kernelSize * 0.5f - 1.0f;
+		float* weights = (m_mode == Mode_2d) ? m_weights + (m_kernelSize * m_kernelSize / 2) : m_weights;
+		float* offsets = (m_mode == Mode_2d) ? m_offsets + (m_kernelSize * m_kernelSize / 2 * offsetStride) : m_offsets;
+		for (int i = 0; i < m_kernelSize; ++i) {
+			vec2 p;
+			p.x = *offsets / m_size + 0.5f;
+			p.y = *weights / graphScale;
+
+			p.x = graphBeg.x + p.x * graphSize.x;
+			p.y = graphEnd.y - p.y * graphSize.y;
+			//drawList->AddLine(vec2(p.x, graphEnd.y), p, IM_COL32_MAGENTA);
+			drawList->AddRectFilled(vec2(ceil(p.x - rectSize), graphEnd.y), vec2(floor(p.x + rectSize), p.y), IM_COLOR_ALPHA(IM_COL32_WHITE, 0.5f));
+			drawList->AddCircleFilled(p, 3.0f, IM_COL32_MAGENTA);
+
+			weights += 1;
+			offsets += offsetStride;
+		}
+
+	 // texel boundaries
+		for (int i = 0; i <= m_size; ++i) {
+			float x = floor(graphBeg.x + (float)i / (float)m_size * graphSize.x);
+			drawList->AddLine(vec2(x, graphBeg.y), vec2(x, graphEnd.y), IM_COL32_RED);
+		}
+
+		ImGui::PopClipRect();
 	}
+
 
 	return true;
 }
@@ -337,12 +423,13 @@ void Convolution::initKernel()
 		for (int i = 0; i < size; ++i) {
 			m_weights[i] = 1.0f / (float)size;
 		}
+		m_kernelSum = 1.0f;
 		break;
 	case Type_Gaussian:
 		if (m_mode == Mode_2d) {
-			GaussianKernel2d(m_size, m_gaussianSigma, m_weights);
+			m_kernelSum = GaussianKernel2d(m_size, m_gaussianSigma, m_weights);
 		} else {
-			GaussianKernel1d(m_size, m_gaussianSigma, m_weights);
+			m_kernelSum = GaussianKernel1d(m_size, m_gaussianSigma, m_weights);
 		}
 		//m_gaussianSigmaOptimal = FindSigma(m_size, 1.0f / 255.0f);
 		break;
