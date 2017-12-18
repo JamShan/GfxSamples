@@ -113,7 +113,52 @@ float GaussianFindSigma(int _size, float _epsilon)
 	return sigma;
 }
 
-// Outputs are arrays of _size / 2 + 1
+float BinomialKernel1d(int _size, float* weights_, bool _normalize = true)
+{
+ // force _size to be odd
+	if (_size % 2 == 0) {
+		++_size;
+	}
+ // generate (Pascal's triangle)
+	weights_[0] = 1.0f;
+	float sum = 1.0f;
+	for (int i = 1; i < _size; ++i) {
+		weights_[i] = weights_[i - 1] * (float)(_size - i) / (float)i;
+		sum += weights_[i];
+	}
+ // normalize
+	if (_normalize) {
+		for (int i = 0; i < _size; ++i) {
+			weights_[i] /= sum;
+		}
+	}
+	return sum;
+}
+
+float BinomialKernel2d(int _size, float* weights_, bool _normalize = true)
+{
+ // force _size to be odd
+	if (_size % 2 == 0) {
+		++_size;
+	}
+ // generate first row
+	float sum = BinomialKernel1d(_size, weights_, false);
+	sum *= sum;	
+ // derive subsequent rows from the first
+	for (int i = 1; i < _size; ++i) {
+		for (int j = 0; j < _size; ++j) {
+			int k = i * _size + j;
+			weights_[k] = (weights_[i] * weights_[j]) / (_normalize ? sum : 1.0f);
+		}
+	}
+ // copy the first row from the last
+	for (int i = 0; i < _size; ++i) {
+		weights_[i] = weights_[(_size - 1) * _size + i];
+	}
+	return sum;
+}
+
+// Outputs are arrays of _size / 2 + 1.
 void KernelOptimizerBilinear1d(int _size, const float* _weightsIn, float* weightsOut_, float* offsetsOut_)
 {
 	const int n = _size / 2;
@@ -160,7 +205,7 @@ bool Convolution::init(const apt::ArgList& _args)
 		return false;
 	}
 
-	m_txSrc = Texture::Create("textures/blurtest1.png");
+	m_txSrc = Texture::Create("textures/blurtest2.png");
 	
 	for (uint i = 0; i < APT_ARRAY_COUNT(m_txDst); ++i) {
 		m_txDst[i] = Texture::Create2d(m_txSrc->getWidth(), m_txSrc->getHeight(), GL_RGBA8);
@@ -194,6 +239,7 @@ bool Convolution::update()
 	reinitKernel |= ImGui::Combo("Type", &m_type,
 		"Box\0"
 		"Gaussian\0"
+		"Binomial\0"
 		);
 	reinitKernel |= ImGui::Combo("Mode", &m_mode,
 		"2d\0"
@@ -407,6 +453,13 @@ void Convolution::initKernel()
 			m_kernelSum = GaussianKernel1d(m_size, m_gaussianSigma, m_weights);
 		}
 		m_gaussianSigmaOptimal = GaussianFindSigma(m_size, 1.0f / 255.0f);
+		break;
+	case Type_Binomial:
+		if (m_mode == Mode_2d) {
+			m_kernelSum = BinomialKernel2d(m_size, m_weights);
+		} else {
+			m_kernelSum = BinomialKernel1d(m_size, m_weights);
+		}
 		break;
 	default:
 		APT_ASSERT(false);

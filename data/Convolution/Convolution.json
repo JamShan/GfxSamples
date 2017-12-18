@@ -14,9 +14,10 @@
 	},
 	"Convolution": {
 		"Show Kernel": true,
-		"Mode": 1,
-		"Gaussian Sigma": 2.6500000953674318,
-		"Size": 11,
-		"Type": 1
+		"Mode": 2,
+		"Gaussian Sigma": 2.990000009536743,
+		"Size": 17,
+		"Type": 1,
+		"Show Graph": true
 	}
 }

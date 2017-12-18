@@ -21,6 +21,7 @@ protected:
 	{
 		Type_Box,
 		Type_Gaussian,
+		Type_Binomial,
 
 		Type_Count
 	};

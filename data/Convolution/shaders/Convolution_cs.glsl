@@ -5,6 +5,7 @@ uniform image2D writeonly txDst;
 
 #define Type_Box                0
 #define Type_Gaussian           1
+#define Type_Binomial           2
 
 #define Mode_2d                 0
 #define Mode_Separable          1
