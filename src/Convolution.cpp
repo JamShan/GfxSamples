@@ -20,36 +20,20 @@ namespace {
 
 #define USE_INTEGRATION 1
 
-#define GaussianIntegration(_mind, _maxd, _sigma, _sigma2) GaussianIntegration_Trapezoid(_mind, _maxd, _sigma, _sigma2)
-
 inline float GaussianDistribution(float _d, float _sigma, float _sigma2)
 {
 	float d = (_d * _d) / (2.0f * _sigma2);
 	return 1.0f / (kTwoPi * _sigma2) * exp(-d);
 }
 
-float GaussianIntegration_Riemann(float _mind, float _maxd, float _sigma, float _sigma2)
+// Evaluate GaussianDistribution() over the interval [_mind,_maxd] via trapezoidal integration.
+float GaussianIntegration(float _mind, float _maxd, float _sigma, float _sigma2, int _sampleCount = 64)
 {
-	const int sampleCount = 100;
-	const float w = 1.0f / (float)(sampleCount - 1);
-	const float stepd = (_maxd - _mind) * w;
-	float d = _mind;
-	float ret = 0.0f;
-	for (int i = 0; i < sampleCount; ++i) {
-		ret += GaussianDistribution(d, _sigma, _sigma2) * w;
-		d += stepd;
-	}
-	return ret;
-}
-
-float GaussianIntegration_Trapezoid(float _mind, float _maxd, float _sigma, float _sigma2)
-{
-	const int sampleCount = 64;
-	const float w = 1.0f / (float)(sampleCount - 1);
+	const float w = 1.0f / (float)(_sampleCount - 1);
 	const float stepd = (_maxd - _mind) * w;
 	float ret = GaussianDistribution(_mind, _sigma, _sigma2);
 	float d = _mind + stepd;
-	for (int i = 1; i < sampleCount - 1; ++i) {
+	for (int i = 1; i < _sampleCount - 1; ++i) {
 		ret += GaussianDistribution(d, _sigma, _sigma2) * 2.0f;
 		d += stepd;
 	}
@@ -64,7 +48,6 @@ float GaussianKernel1d(int _size, float _sigma, float* weights_, bool _normalize
 	if (_size % 2 == 0) {
 		++_size;
 	}
-
  // generate
 	const float sigma2 = _sigma * _sigma;
 	const int n = _size / 2;
@@ -78,12 +61,12 @@ float GaussianKernel1d(int _size, float _sigma, float* weights_, bool _normalize
 		#endif
 		sum += weights_[i];
 	}
-
  // normalize
-	for (int i = 0; i < _size; ++i) {
-		weights_[i] /= sum;
+	if (_normalize) {
+		for (int i = 0; i < _size; ++i) {
+			weights_[i] /= sum;
+		}
 	}
-
 	return sum;
 }
 
@@ -93,31 +76,41 @@ float GaussianKernel2d(int _size, float _sigma, float* weights_, bool _normalize
 	if (_size % 2 == 0) {
 		++_size;
 	}
-
  // generate first row
-	GaussianKernel1d(_size, _sigma, weights_, false);
-	
+	float sum = GaussianKernel1d(_size, _sigma, weights_, false);
+	sum *= sum;	
  // derive subsequent rows from the first
-	float sum = 0.0f;
 	for (int i = 1; i < _size; ++i) {
 		for (int j = 0; j < _size; ++j) {
 			int k = i * _size + j;
-			weights_[k] = weights_[i] * weights_[j];
-			sum += weights_[k];
+			weights_[k] = (weights_[i] * weights_[j]) / (_normalize ? sum : 1.0f);
 		}
 	}
  // copy the first row from the last
 	for (int i = 0; i < _size; ++i) {
 		weights_[i] = weights_[(_size - 1) * _size + i];
-		sum += weights_[i];
 	}
-
- // normalize
-	for (int i = 0; i < _size; ++i) {
-		weights_[i] /= sum;
-	}
-
 	return sum;
+}
+
+// Find sigma such that no weights are < _epsilon. Epsilon should be the smallest representable for the precision of the signal to be convolved e.g. 1/255 for 8-bit.
+float GaussianFindSigma(int _size, float _epsilon)
+{
+	float* tmp = new float[_size];
+	const float d = (float)(-_size / 2);
+	float sigma = 1.0f;
+	float stp = 1.0f;
+	while (stp > 0.01f) {
+		GaussianKernel1d(_size, sigma, tmp);
+		float w = tmp[0];
+		if (w > _epsilon) {
+			sigma -= stp;
+			stp *= 0.5f;
+		}
+		sigma += stp;
+	}
+	delete[] tmp;
+	return sigma;
 }
 
 // Outputs are arrays of _size / 2 + 1
@@ -138,29 +131,6 @@ void KernelOptimizerBilinear1d(int _size, const float* _weightsIn, float* weight
 	}
 	weightsOut_[j] = _weightsIn[_size - 1];
 	offsetsOut_[j] = (float)(_size - 1 - n);
-}
-
-// Find sigma such that no weights are < _epsilon. Epsilon should be the smallest representable value in the image e.g. 1/255 for 8-bit.
-float FindSigma(int _size, float _epsilon)
-{
-	const float d = (float)(-_size / 2);
-	float sigma = 1.0f;
-	float stp = 1.0f;
-	while (stp > 0.01f) {
-	 // \todo this is wrong, w should be normalized against the sum of all elements in the kernel
-		#if USE_INTEGRATION
-			float w = GaussianIntegration(d - 0.5f, d + 0.5f, sigma, sigma * sigma);
-		#else
-			float w = GaussianDistribution(d, sigma, sigma * sigma);
-		#endif
-		if (w > _epsilon) {
-			sigma -= stp;
-			stp *= 0.5f;
-		}
-		sigma += stp;
-	}
-
-	return sigma;
 }
 
 } // namespace
@@ -190,7 +160,7 @@ bool Convolution::init(const apt::ArgList& _args)
 		return false;
 	}
 
-	m_txSrc = Texture::Create("textures/blurtest2.png");
+	m_txSrc = Texture::Create("textures/blurtest1.png");
 	
 	for (uint i = 0; i < APT_ARRAY_COUNT(m_txDst); ++i) {
 		m_txDst[i] = Texture::Create2d(m_txSrc->getWidth(), m_txSrc->getHeight(), GL_RGBA8);
@@ -290,15 +260,17 @@ bool Convolution::update()
 		vec2 graphBeg  = vec2(ImGui::GetCursorPos()) + vec2(ImGui::GetWindowPos());
 		vec2 graphSize = vec2(ImGui::GetContentRegionAvailWidth(), 200.0f);
 		vec2 graphEnd  = graphBeg + graphSize;
-		float graphScale = 1.0f;
+		float graphScale = 0.0f;
+		for (int i = 0; i < m_kernelSize; ++i) {
+			graphScale = APT_MAX(graphScale, m_weights[i]);
+		}
+		graphScale *= 1.1f;
 
 		drawList->AddRectFilled(graphBeg, graphEnd, IM_COL32_BLACK);
 		ImGui::PushClipRect(graphBeg - vec2(1.0f), graphEnd + vec2(1.0f), true);
 		
 	 // sample the function directly
 		if (m_type == Type_Gaussian) {
-			graphScale = GaussianDistribution(0.0f, m_gaussianSigma, m_gaussianSigma * m_gaussianSigma) / m_kernelSum;
-			graphScale *= 2.0f;
 			const int directSampleCount = (int)graphSize.x / 4;
 			vec2 q = graphBeg + vec2(0.0f, graphSize.y);
 			for (int i = 0; i < directSampleCount; ++i) {
@@ -306,7 +278,6 @@ bool Convolution::update()
 				p.x = (float)i / (float)directSampleCount;
 				float d = p.x * (float)m_size - (float)m_size * 0.5f;
 				p.y = GaussianDistribution(d, m_gaussianSigma, m_gaussianSigma * m_gaussianSigma) / m_kernelSum / graphScale;
-
 				p.x = graphBeg.x + p.x * graphSize.x;
 				p.y = graphEnd.y - p.y * graphSize.y;
 				drawList->AddLine(q, p, IM_COL32_MAGENTA);
@@ -315,20 +286,24 @@ bool Convolution::update()
 		}
 
 	 // draw computed weights at offsets
+		const float texelCoverage = (m_mode == Mode_SeparableBilinear) ? 2.0f : 1.0f;
 		const int offsetStride = (m_mode == Mode_2d) ? 2 : 1;
-		const float rectSize = graphSize.x / (float)m_kernelSize * 0.5f - 1.0f;
+		const float rectSize = graphSize.x / (float)m_size * texelCoverage;
 		float* weights = (m_mode == Mode_2d) ? m_weights + (m_kernelSize * m_kernelSize / 2) : m_weights;
 		float* offsets = (m_mode == Mode_2d) ? m_offsets + (m_kernelSize * m_kernelSize / 2 * offsetStride) : m_offsets;
 		for (int i = 0; i < m_kernelSize; ++i) {
 			vec2 p;
 			p.x = *offsets / m_size + 0.5f;
 			p.y = *weights / graphScale;
+			p.x = floor(graphBeg.x + p.x * graphSize.x);
+			p.y = floor(graphEnd.y - p.y * graphSize.y);
+			drawList->AddLine(vec2(p.x, graphEnd.y), p, IM_COL32_WHITE);
+			drawList->AddCircleFilled(p, 3.0f, IM_COL32_WHITE);
 
-			p.x = graphBeg.x + p.x * graphSize.x;
-			p.y = graphEnd.y - p.y * graphSize.y;
-			//drawList->AddLine(vec2(p.x, graphEnd.y), p, IM_COL32_MAGENTA);
-			drawList->AddRectFilled(vec2(ceil(p.x - rectSize), graphEnd.y), vec2(floor(p.x + rectSize), p.y), IM_COLOR_ALPHA(IM_COL32_WHITE, 0.5f));
-			drawList->AddCircleFilled(p, 3.0f, IM_COL32_MAGENTA);
+		 // texel coverage per sample
+			p.x = (float)i / (float)m_size * texelCoverage;
+			p.x = floor(graphBeg.x + p.x * graphSize.x);
+			drawList->AddRectFilled(vec2(p.x, graphEnd.y), vec2(floor(p.x + rectSize), p.y), IM_COLOR_ALPHA(IM_COL32_WHITE, 0.2f));
 
 			weights += 1;
 			offsets += offsetStride;
@@ -431,7 +406,7 @@ void Convolution::initKernel()
 		} else {
 			m_kernelSum = GaussianKernel1d(m_size, m_gaussianSigma, m_weights);
 		}
-		//m_gaussianSigmaOptimal = FindSigma(m_size, 1.0f / 255.0f);
+		m_gaussianSigmaOptimal = GaussianFindSigma(m_size, 1.0f / 255.0f);
 		break;
 	default:
 		APT_ASSERT(false);
