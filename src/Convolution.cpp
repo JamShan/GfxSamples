@@ -2,6 +2,7 @@
 
 #include <frm/def.h>
 #include <frm/gl.h>
+#include <frm/icon_fa.h>
 #include <frm/Buffer.h>
 #include <frm/Framebuffer.h>
 #include <frm/GlContext.h>
@@ -205,7 +206,7 @@ bool Convolution::init(const apt::ArgList& _args)
 		return false;
 	}
 
-	m_txSrc = Texture::Create("textures/blurtest2.png");
+	m_txSrc = Texture::Create("textures/blurtest1.png");
 	
 	for (uint i = 0; i < APT_ARRAY_COUNT(m_txDst); ++i) {
 		m_txDst[i] = Texture::Create2d(m_txSrc->getWidth(), m_txSrc->getHeight(), GL_RGBA8);
@@ -243,6 +244,7 @@ bool Convolution::update()
 		);
 	reinitKernel |= ImGui::Combo("Mode", &m_mode,
 		"2d\0"
+		"2d Bilinear\0"
 		"Seperable\0"
 		"Seperable Bilinear\0"
 		);
@@ -258,22 +260,25 @@ bool Convolution::update()
 
 	ImGui::Checkbox("Show Kernel", &m_showKernel);
 	if (m_showKernel) {
+		bool is2d = m_mode == Mode_2d || m_mode == Mode_2dBilinear;
+		bool isBilinear = m_mode == Mode_2dBilinear || m_mode == Mode_SeparableBilinear;
+
 		ImGui::Begin("Kernel", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 			String<128> clipboardStr;
-
 			ImGui::Text("Weights:");
-			int rows = m_mode == Mode_2d ? m_kernelSize : 1;
+			int cols = isBilinear ? m_size / 2 + 1 : m_size;
+			int rows = is2d ? cols : 1;
 			for (int i = 0; i < rows; ++i) {
 				String<128> rowStr;
-				for (int j = 0; j < m_kernelSize; ++j) {
-					int k = i * m_kernelSize + j;
+				for (int j = 0; j < cols; ++j) {
+					int k = i * cols + j;
 					rowStr.appendf("%1.4f   ", m_weights[k]);
 					clipboardStr.appendf("%f, ", m_weights[k]);
 				}
 				ImGui::Text((const char*)rowStr);
 				clipboardStr.appendf("\n");
 			}
-			if (ImGui::Button("Copy to Clipboard##Weights")) {
+			if (ImGui::Button(ICON_FA_CLIPBOARD "##Weights")) {
 				ImGui::SetClipboardText((const char*)clipboardStr);
 			}
 
@@ -282,9 +287,9 @@ bool Convolution::update()
 			ImGui::Text("Offsets:");
 			for (int i = 0; i < rows; ++i) {
 				String<64> rowStr;
-				for (int j = 0; j < m_kernelSize; ++j) {
-					int k = i * m_kernelSize + j;
-					if (m_mode == Mode_2d) {
+				for (int j = 0; j < cols; ++j) {
+					int k = i * cols + j;
+					if (is2d) {
 						rowStr.appendf("(%+1.4f, %+1.4f)   ", m_offsets[k * 2], m_offsets[k * 2 + 1]);
 						clipboardStr.appendf("(%f, %f), ", m_offsets[k * 2], m_offsets[k * 2 + 1]);
 					} else {
@@ -295,13 +300,16 @@ bool Convolution::update()
 				ImGui::Text((const char*)rowStr);
 				clipboardStr.appendf("\n");
 			}
-			if (ImGui::Button("Copy to Clipboard##Offsets")) {
+			if (ImGui::Button(ICON_FA_CLIPBOARD "##Offsets")) {
 				ImGui::SetClipboardText((const char*)clipboardStr);
 			}
 		ImGui::End();
 	}
 	ImGui::Checkbox("Show Kernel Graph", &m_showKernelGraph);
 	if (m_showKernelGraph) {
+		bool is2d = m_mode == Mode_2d || m_mode == Mode_2dBilinear;
+		bool isBilinear = m_mode == Mode_2dBilinear || m_mode == Mode_SeparableBilinear;
+
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 		vec2 graphBeg  = vec2(ImGui::GetCursorPos()) + vec2(ImGui::GetWindowPos());
 		vec2 graphSize = vec2(ImGui::GetContentRegionAvailWidth(), 200.0f);
@@ -332,11 +340,11 @@ bool Convolution::update()
 		}
 
 	 // draw computed weights at offsets
-		const float texelCoverage = (m_mode == Mode_SeparableBilinear) ? 2.0f : 1.0f;
-		const int offsetStride = (m_mode == Mode_2d) ? 2 : 1;
+		const float texelCoverage = isBilinear ? 2.0f : 1.0f;
+		const int offsetStride = is2d ? 2 : 1;
 		const float rectSize = graphSize.x / (float)m_size * texelCoverage;
-		float* weights = (m_mode == Mode_2d) ? m_weights + (m_kernelSize * m_kernelSize / 2) : m_weights;
-		float* offsets = (m_mode == Mode_2d) ? m_offsets + (m_kernelSize * m_kernelSize / 2 * offsetStride) : m_offsets;
+		float* weights = is2d ? m_weights + (m_kernelSize * m_kernelSize / 2) : m_weights;
+		float* offsets = is2d ? m_offsets + (m_kernelSize * m_kernelSize / 2 * offsetStride) : m_offsets;
 		for (int i = 0; i < m_kernelSize; ++i) {
 			vec2 p;
 			p.x = *offsets / m_size + 0.5f;
@@ -372,9 +380,11 @@ void Convolution::draw()
 {
 	GlContext* ctx = GlContext::GetCurrent();
 
+	bool is2d = m_mode == Mode_2d || m_mode == Mode_2dBilinear;
+	
 	{	AUTO_MARKER("Convolution");
 		ctx->setShader(m_shConvolution);
-		if (m_mode == Mode_2d) {
+		if (is2d) {
 			ctx->setUniformArray("uWeights", m_weights, m_size * m_size);
 			ctx->setUniformArray("uOffsets", (vec2*)m_offsets, m_size * m_size);
 		} else {
@@ -382,7 +392,7 @@ void Convolution::draw()
 			ctx->setUniformArray("uOffsets", m_offsets, m_size);
 		}
 
-		if (m_mode == Mode_2d) {
+		if (is2d) {
 			ctx->bindTexture("txSrc", m_txSrc);
 			ctx->bindImage  ("txDst", m_txDst[0], GL_WRITE_ONLY);
 			ctx->dispatch   (m_txDst[0]);
@@ -414,14 +424,16 @@ void Convolution::initKernel()
 	if (m_size % 2 == 0) {
 		++m_size;
 	}
+
+	bool is2d = m_mode == Mode_2d ;//|| m_mode == Mode_2dBilinear;
 	
-	const int kernelDims = m_mode == Mode_2d ? 2 : 1;
+	const int kernelDims = is2d ? 2 : 1;
 	const int hsize = m_size / 2;
 	int size = m_size * (kernelDims == 2 ? m_size : 1);
 
  // offsets
 	m_offsets = new float[size * kernelDims]; // offsets are vec2 for a 2d kernel
-	if (m_mode == Mode_2d) {
+	if (is2d) {
 		for (int i = 0; i < m_size; ++i) {
 			float y = (float)(i - hsize);
 			for (int j = 0; j < m_size; ++j) {
@@ -447,7 +459,7 @@ void Convolution::initKernel()
 		m_kernelSum = 1.0f;
 		break;
 	case Type_Gaussian:
-		if (m_mode == Mode_2d) {
+		if (is2d) {
 			m_kernelSum = GaussianKernel2d(m_size, m_gaussianSigma, m_weights);
 		} else {
 			m_kernelSum = GaussianKernel1d(m_size, m_gaussianSigma, m_weights);
@@ -455,7 +467,7 @@ void Convolution::initKernel()
 		m_gaussianSigmaOptimal = GaussianFindSigma(m_size, 1.0f / 255.0f);
 		break;
 	case Type_Binomial:
-		if (m_mode == Mode_2d) {
+		if (is2d) {
 			m_kernelSum = BinomialKernel2d(m_size, m_weights);
 		} else {
 			m_kernelSum = BinomialKernel1d(m_size, m_weights);
@@ -466,7 +478,8 @@ void Convolution::initKernel()
 		break;
 	};
 
-	if (m_mode == Mode_SeparableBilinear) {
+	switch (m_mode) {
+	case Mode_2dBilinear: {
 		size = m_kernelSize = m_size / 2 + 1;
 		float* weightsOpt = new float[m_kernelSize];
 		float* offsetsOpt = new float[m_kernelSize];
@@ -475,8 +488,50 @@ void Convolution::initKernel()
 		delete[] m_offsets;
 		m_weights = weightsOpt;
 		m_offsets = offsetsOpt;
-	} else {
+
+	m_kernelSize = size * size;
+	weightsOpt = new float[m_kernelSize];
+	offsetsOpt = new float[m_kernelSize * 2];
+	m_kernelSum *= m_kernelSum;
+ // derive subsequent rows from the first
+	for (int i = 1; i < size; ++i) {
+		for (int j = 0; j < size; ++j) {
+			int k = i * size + j;
+			weightsOpt[k] = (m_weights[i] * m_weights[j]) / m_kernelSum;
+		}
+	}
+ // copy the first row from the last
+	for (int i = 0; i < size; ++i) {
+		weightsOpt[i] = weightsOpt[(size - 1) * size + i];
+	}
+ // offsets are symmetrical in both dimensions
+	for (int i = 0; i < size; ++i) {
+		for (int j = 0; j < size; ++j) {
+			int k = (i * size + j) * 2;
+			offsetsOpt[k] = m_offsets[j];
+			offsetsOpt[k + 1] = m_offsets[i];
+		}
+	}
+	delete[] m_weights;
+	delete[] m_offsets;
+	m_weights = weightsOpt;
+	m_offsets = offsetsOpt;
+	break;
+		}
+	case Mode_SeparableBilinear: {
+		size = m_kernelSize = m_size / 2 + 1;
+		float* weightsOpt = new float[m_kernelSize];
+		float* offsetsOpt = new float[m_kernelSize];
+		KernelOptimizerBilinear1d(m_size, m_weights, weightsOpt, offsetsOpt);
+		delete[] m_weights;
+		delete[] m_offsets;
+		m_weights = weightsOpt;
+		m_offsets = offsetsOpt;
+		break;
+		}
+	default:
 		m_kernelSize = m_size;
+		break;
 	}
 	
  // shader

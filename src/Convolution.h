@@ -43,6 +43,7 @@ protected:
 	enum Mode
 	{
 		Mode_2d,
+		Mode_2dBilinear,
 		Mode_Separable,
 		Mode_SeparableBilinear,
 

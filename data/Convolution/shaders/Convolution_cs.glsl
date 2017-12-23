@@ -8,8 +8,9 @@ uniform image2D writeonly txDst;
 #define Type_Binomial           2
 
 #define Mode_2d                 0
-#define Mode_Separable          1
-#define Mode_SeparableBilinear  2
+#define Mode_2dBilinear         1
+#define Mode_Separable          2
+#define Mode_SeparableBilinear  3
 
 #ifndef TYPE
 	#error TYPE not defined
@@ -22,7 +23,7 @@ uniform image2D writeonly txDst;
 #endif
 
 
-#if (MODE == Mode_2d)
+#if (MODE == Mode_2d || MODE == Mode_2dBilinear)
 	#define OffsetType vec2
 	#define GetOffset(iuv, i) (iuv + uOffsets[i])
 
