@@ -315,7 +315,8 @@ bool Convolution::update()
 		vec2 graphSize = vec2(ImGui::GetContentRegionAvailWidth(), 200.0f);
 		vec2 graphEnd  = graphBeg + graphSize;
 		float graphScale = 0.0f;
-		for (int i = 0; i < m_kernelSize; ++i) {
+		int n = isBilinear ? m_size / 2 + 1 : m_size;
+		for (int i = 0; i < n; ++i) {
 			graphScale = APT_MAX(graphScale, m_weights[i]);
 		}
 		graphScale *= 1.1f;
@@ -343,9 +344,9 @@ bool Convolution::update()
 		const float texelCoverage = isBilinear ? 2.0f : 1.0f;
 		const int offsetStride = is2d ? 2 : 1;
 		const float rectSize = graphSize.x / (float)m_size * texelCoverage;
-		float* weights = is2d ? m_weights + (m_kernelSize * m_kernelSize / 2) : m_weights;
-		float* offsets = is2d ? m_offsets + (m_kernelSize * m_kernelSize / 2 * offsetStride) : m_offsets;
-		for (int i = 0; i < m_kernelSize; ++i) {
+		float* weights = is2d ? m_weights + (m_kernelSize / 2) : m_weights;
+		float* offsets = is2d ? m_offsets + (m_kernelSize / 2 * offsetStride) : m_offsets;
+		for (int i = 0; i < n; ++i) {
 			vec2 p;
 			p.x = *offsets / m_size + 0.5f;
 			p.y = *weights / graphScale;
@@ -385,11 +386,11 @@ void Convolution::draw()
 	{	AUTO_MARKER("Convolution");
 		ctx->setShader(m_shConvolution);
 		if (is2d) {
-			ctx->setUniformArray("uWeights", m_weights, m_size * m_size);
-			ctx->setUniformArray("uOffsets", (vec2*)m_offsets, m_size * m_size);
+			ctx->setUniformArray("uWeights", m_weights, m_kernelSize);
+			ctx->setUniformArray("uOffsets", (vec2*)m_offsets, m_kernelSize);
 		} else {
-			ctx->setUniformArray("uWeights", m_weights, m_size);
-			ctx->setUniformArray("uOffsets", m_offsets, m_size);
+			ctx->setUniformArray("uWeights", m_weights, m_kernelSize);
+			ctx->setUniformArray("uOffsets", m_offsets, m_kernelSize);
 		}
 
 		if (is2d) {
@@ -429,10 +430,10 @@ void Convolution::initKernel()
 	
 	const int kernelDims = is2d ? 2 : 1;
 	const int hsize = m_size / 2;
-	int size = m_size * (kernelDims == 2 ? m_size : 1);
+	m_kernelSize = m_size * (kernelDims == 2 ? m_size : 1);
 
  // offsets
-	m_offsets = new float[size * kernelDims]; // offsets are vec2 for a 2d kernel
+	m_offsets = new float[m_kernelSize * kernelDims]; // offsets are vec2 for a 2d kernel
 	if (is2d) {
 		for (int i = 0; i < m_size; ++i) {
 			float y = (float)(i - hsize);
@@ -450,11 +451,11 @@ void Convolution::initKernel()
 	}
 
  // weights
-	m_weights = new float[size];
+	m_weights = new float[m_kernelSize];
 	switch (m_type) {
 	case Type_Box:
-		for (int i = 0; i < size; ++i) {
-			m_weights[i] = 1.0f / (float)size;
+		for (int i = 0; i < m_kernelSize; ++i) {
+			m_weights[i] = 1.0f / (float)m_kernelSize;
 		}
 		m_kernelSum = 1.0f;
 		break;
@@ -480,9 +481,9 @@ void Convolution::initKernel()
 
 	switch (m_mode) {
 	case Mode_2dBilinear: {
-		size = m_kernelSize = m_size / 2 + 1;
-		float* weightsOpt = new float[m_kernelSize];
-		float* offsetsOpt = new float[m_kernelSize];
+		int size = m_size / 2 + 1;
+		float* weightsOpt = new float[size];
+		float* offsetsOpt = new float[size];
 		KernelOptimizerBilinear1d(m_size, m_weights, weightsOpt, offsetsOpt);
 		delete[] m_weights;
 		delete[] m_offsets;
@@ -516,10 +517,11 @@ void Convolution::initKernel()
 	delete[] m_offsets;
 	m_weights = weightsOpt;
 	m_offsets = offsetsOpt;
+
 	break;
 		}
 	case Mode_SeparableBilinear: {
-		size = m_kernelSize = m_size / 2 + 1;
+		m_kernelSize = m_size / 2 + 1;
 		float* weightsOpt = new float[m_kernelSize];
 		float* offsetsOpt = new float[m_kernelSize];
 		KernelOptimizerBilinear1d(m_size, m_weights, weightsOpt, offsetsOpt);
@@ -530,7 +532,6 @@ void Convolution::initKernel()
 		break;
 		}
 	default:
-		m_kernelSize = m_size;
 		break;
 	}
 	
@@ -540,7 +541,7 @@ void Convolution::initKernel()
 	shDesc.setLocalSize(8, 8);
 	shDesc.addDefine(GL_COMPUTE_SHADER, "TYPE", m_type);
 	shDesc.addDefine(GL_COMPUTE_SHADER, "MODE", m_mode);
-	shDesc.addDefine(GL_COMPUTE_SHADER, "KERNEL_SIZE", size);
+	shDesc.addDefine(GL_COMPUTE_SHADER, "KERNEL_SIZE", m_kernelSize);
 	m_shConvolution = Shader::Create(shDesc);
 }
 

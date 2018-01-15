@@ -26,13 +26,13 @@ protected:
 		Type_Count
 	};
 	int           m_type;
-	int           m_size;
+	int           m_size; // square root of the kernel array size
 	float         m_gaussianSigma;
 	float         m_gaussianSigmaOptimal;
 	bool          m_showKernel;
 	bool          m_showKernelGraph;
 
-	int           m_kernelSize;
+	int           m_kernelSize; // actual size of the kernel array
 	float         m_kernelSum;
 	float*        m_weights;
 	float*        m_offsets;
