@@ -160,23 +160,77 @@ float BinomialKernel2d(int _size, float* weights_, bool _normalize = true)
 }
 
 // Outputs are arrays of _size / 2 + 1.
-void KernelOptimizerBilinear1d(int _size, const float* _weightsIn, float* weightsOut_, float* offsetsOut_)
+void KernelOptimizeBilinear1d(int _size, const float* _weightsIn, float* weightsOut_, float* offsetsOut_)
 {
-	const int n = _size / 2;
+	const int halfSize = _size / 2;
 	int j = 0;
-	for (int i = 0; i != _size - 1; i += 2) {
+	for (int i = 0; i != _size - 1; i += 2, ++j) {
 		float w1 = _weightsIn[i];
 		float w2 = _weightsIn[i + 1];
 		float w3 = w1 + w2;
-		float o1 = (float)(i - n);
-		float o2 = (float)(i - n + 1);
+		float o1 = (float)(i - halfSize);
+		float o2 = (float)(i - halfSize + 1);
 		float o3 = (o1 * w1 + o2 * w2) / w3;
 		weightsOut_[j] = w3;
 		offsetsOut_[j] = o3;
-		++j;
 	}
 	weightsOut_[j] = _weightsIn[_size - 1];
-	offsetsOut_[j] = (float)(_size - 1 - n);
+	offsetsOut_[j] = (float)(_size - 1 - halfSize);
+}
+
+// Outputs are arrays of (_size / 2 + 1) ^ 2.
+void KernelOptimizeBilinear2d(int _size, const float* _weightsIn, float* weightsOut_, vec2* offsetsOut_)
+{
+	const int outSize = _size / 2 + 1;
+	const int halfSize = _size / 2;
+	int row, col;
+	for (row = 0; row < _size - 1; row += 2) {
+		for (col = 0; col < _size - 1; col += 2) {
+			float w1 = _weightsIn[(row * _size) + col];
+			float w2 = _weightsIn[(row * _size) + col + 1];
+			float w3 = _weightsIn[((row + 1) * _size) + col];
+			float w4 = _weightsIn[((row + 1) * _size) + col + 1];
+			float w5 = w1 + w2 + w3 + w4;
+			vec2  o1 = vec2(col - halfSize,     row - halfSize);
+			vec2  o2 = vec2(col - halfSize + 1, row - halfSize);
+			vec2  o3 = vec2(col - halfSize,     row - halfSize + 1);
+			vec2  o4 = vec2(col - halfSize + 1, row - halfSize + 1);
+			vec2  o5 = (o1 * w1 + o2 * w2 + o3 * w3 + o4 * w4) / w5;
+
+			const int k = (row / 2) * outSize + (col / 2);
+			weightsOut_[k] = w5;
+			offsetsOut_[k] = o5;
+		}
+
+		float w1 = _weightsIn[(row * _size) + col];
+		float w2 = _weightsIn[((row + 1) * _size) + col];
+		float w3 = w1 + w2;
+		vec2  o1 = vec2(col - halfSize, row - halfSize);
+		vec2  o2 = vec2(col - halfSize, row - halfSize + 1);
+		vec2  o3 = (o1 * w1 + o2 * w2) / w3;
+	
+		const int k = (row / 2) * outSize + (col / 2);
+		weightsOut_[k] = w3;
+		offsetsOut_[k] = o3;
+	}
+
+	for (col = 0; col < _size - 1; col += 2) {
+		float w1 = _weightsIn[(row * _size) + col];
+		float w2 = _weightsIn[(row * _size) + col + 1];
+		float w3 = w1 + w2;
+		vec2  o1 = vec2(col - halfSize,     row - halfSize);
+		vec2  o2 = vec2(col - halfSize + 1, row - halfSize);
+		vec2  o3 = (o1 * w1 + o2 * w2) / w3;
+
+		const int k = (row / 2) * outSize + (col / 2);
+		weightsOut_[k] = w3;
+		offsetsOut_[k] = o3;
+	}
+
+	const int k = (row / 2) * outSize + (col / 2);
+	weightsOut_[k] = _weightsIn[(row * _size) + col];
+	offsetsOut_[k] = vec2(_size / 2);
+	
 }
 
 } // namespace
@@ -426,7 +480,7 @@ void Convolution::initKernel()
 		++m_size;
 	}
 
-	bool is2d = m_mode == Mode_2d ;//|| m_mode == Mode_2dBilinear;
+	bool is2d = m_mode == Mode_2d || m_mode == Mode_2dBilinear;
 	
 	const int kernelDims = is2d ? 2 : 1;
 	const int hsize = m_size / 2;
@@ -481,50 +535,22 @@ void Convolution::initKernel()
 
 	switch (m_mode) {
 	case Mode_2dBilinear: {
-		int size = m_size / 2 + 1;
-		float* weightsOpt = new float[size];
-		float* offsetsOpt = new float[size];
-		KernelOptimizerBilinear1d(m_size, m_weights, weightsOpt, offsetsOpt);
+		m_kernelSize = m_size / 2 + 1;
+		m_kernelSize = m_kernelSize * m_kernelSize;
+		float* weightsOpt = new float[m_kernelSize];
+		float* offsetsOpt = new float[m_kernelSize * 2];
+		KernelOptimizeBilinear2d(m_size, m_weights, weightsOpt, (vec2*)offsetsOpt);
 		delete[] m_weights;
 		delete[] m_offsets;
 		m_weights = weightsOpt;
 		m_offsets = offsetsOpt;
-
-	m_kernelSize = size * size;
-	weightsOpt = new float[m_kernelSize];
-	offsetsOpt = new float[m_kernelSize * 2];
-	m_kernelSum *= m_kernelSum;
- // derive subsequent rows from the first
-	for (int i = 1; i < size; ++i) {
-		for (int j = 0; j < size; ++j) {
-			int k = i * size + j;
-			weightsOpt[k] = (m_weights[i] * m_weights[j]) / m_kernelSum;
-		}
-	}
- // copy the first row from the last
-	for (int i = 0; i < size; ++i) {
-		weightsOpt[i] = weightsOpt[(size - 1) * size + i];
-	}
- // offsets are symmetrical in both dimensions
-	for (int i = 0; i < size; ++i) {
-		for (int j = 0; j < size; ++j) {
-			int k = (i * size + j) * 2;
-			offsetsOpt[k] = m_offsets[j];
-			offsetsOpt[k + 1] = m_offsets[i];
-		}
-	}
-	delete[] m_weights;
-	delete[] m_offsets;
-	m_weights = weightsOpt;
-	m_offsets = offsetsOpt;
-
-	break;
+		break;
 		}
 	case Mode_SeparableBilinear: {
 		m_kernelSize = m_size / 2 + 1;
 		float* weightsOpt = new float[m_kernelSize];
 		float* offsetsOpt = new float[m_kernelSize];
-		KernelOptimizerBilinear1d(m_size, m_weights, weightsOpt, offsetsOpt);
+		KernelOptimizeBilinear1d(m_size, m_weights, weightsOpt, offsetsOpt);
 		delete[] m_weights;
 		delete[] m_offsets;
 		m_weights = weightsOpt;
