@@ -191,40 +191,41 @@ void KernelOptimizeBilinear2d(int _size, const float* _weightsIn, float* weights
 			float w3 = _weightsIn[((row + 1) * _size) + col];
 			float w4 = _weightsIn[((row + 1) * _size) + col + 1];
 			float w5 = w1 + w2 + w3 + w4;
-			vec2  o1 = vec2(col - halfSize,     row - halfSize);
-			vec2  o2 = vec2(col - halfSize + 1, row - halfSize);
-			vec2  o3 = vec2(col - halfSize,     row - halfSize + 1);
-			vec2  o4 = vec2(col - halfSize + 1, row - halfSize + 1);
-			vec2  o5 = (o1 * w1 + o2 * w2 + o3 * w3 + o4 * w4) / w5;
+			float x1 = (float)(col - halfSize);
+			float x2 = (float)(col - halfSize + 1);
+			float x3 = (x1 * w1 + x2 * w2) / (w1 + w2);
+			float y1 = (float)(row - halfSize);
+			float y2 = (float)(row - halfSize + 1);
+			float y3 = (y1 * w1 + y2 * w3) / (w1 + w3);
 
 			const int k = (row / 2) * outSize + (col / 2);
 			weightsOut_[k] = w5;
-			offsetsOut_[k] = o5;
+			offsetsOut_[k] = vec2(x3, y3);
 		}
 
 		float w1 = _weightsIn[(row * _size) + col];
 		float w2 = _weightsIn[((row + 1) * _size) + col];
 		float w3 = w1 + w2;
-		vec2  o1 = vec2(col - halfSize, row - halfSize);
-		vec2  o2 = vec2(col - halfSize, row - halfSize + 1);
-		vec2  o3 = (o1 * w1 + o2 * w2) / w3;
+		float y1 = (float)(row - halfSize);
+		float y2 = (float)(row - halfSize + 1);
+		float y3 = (y1 * w1 + y2 * w2) / w3;
 	
 		const int k = (row / 2) * outSize + (col / 2);
 		weightsOut_[k] = w3;
-		offsetsOut_[k] = o3;
+		offsetsOut_[k] = vec2((float)(col - halfSize), y3);
 	}
 
 	for (col = 0; col < _size - 1; col += 2) {
 		float w1 = _weightsIn[(row * _size) + col];
 		float w2 = _weightsIn[(row * _size) + col + 1];
 		float w3 = w1 + w2;
-		vec2  o1 = vec2(col - halfSize,     row - halfSize);
-		vec2  o2 = vec2(col - halfSize + 1, row - halfSize);
-		vec2  o3 = (o1 * w1 + o2 * w2) / w3;
+		float x1 = (float)(col - halfSize);
+		float x2 = (float)(col - halfSize + 1);
+		float x3 = (x1 * w1 + x2 * w2) / w3;
 
 		const int k = (row / 2) * outSize + (col / 2);
 		weightsOut_[k] = w3;
-		offsetsOut_[k] = o3;
+		offsetsOut_[k] = vec2(x3, (float)(row - halfSize));
 	}
 
 	const int k = (row / 2) * outSize + (col / 2);
@@ -260,7 +261,7 @@ bool Convolution::init(const apt::ArgList& _args)
 		return false;
 	}
 
-	m_txSrc = Texture::Create("textures/blurtest1.png");
+	m_txSrc = Texture::Create("textures/blurtest2.png");
 	
 	for (uint i = 0; i < APT_ARRAY_COUNT(m_txDst); ++i) {
 		m_txDst[i] = Texture::Create2d(m_txSrc->getWidth(), m_txSrc->getHeight(), GL_RGBA8);
