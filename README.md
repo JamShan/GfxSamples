@@ -15,19 +15,17 @@ premake5 --file=premake.lua [target]
 ### Dependencies
 
 Submodule dependencies:
- - [ApplicationTools](https://github.com/john-chapman/ApplicationTools)
- - [GfxSamplesFramework](https://github.com/john-chapman/GfxSampleFramework)
+- [ApplicationTools](https://github.com/john-chapman/ApplicationTools)
  
 Embedded dependencies:
- - [EASTL](https://github.com/electronicarts/EASTL)
- - [GLM](https://github.com/g-truc/glm)
- - [GLEW](http://glew.sourceforge.net/)
- - [Im3d](https://github.com/john-chapman/im3d/)
- - [ImGui](https://github.com/ocornut/imgui)
- - [RapidJSON](http://rapidjson.org/)
- - [LodePNG](http://lodev.org/lodepng/)
- - [Miniz](https://github.com/richgel999/miniz)
- - [stb](https://github.com/nothings/stb)
- - [tinyobjloader](https://github.com/syoyo/tinyobjloader)
- - [lua](https://www.lua.org)
+- [EASTL](https://github.com/electronicarts/EASTL)
+- [linalg](https://github.com/john-chapman/linalg)
+- [LodePNG](http://lodev.org/lodepng/)
+- [Miniz](https://github.com/richgel999/miniz)
+- [RapidJSON](http://rapidjson.org/)
+- [stb](https://github.com/nothings/stb)
+- [Im3d](https://github.com/john-chapman/im3d/)
+- [ImGui](https://github.com/ocornut/imgui)
+- [tinyobjloader](https://github.com/syoyo/tinyobjloader)
+- [lua](https://www.lua.org)
 	
