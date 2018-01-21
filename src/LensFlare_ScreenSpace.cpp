@@ -11,7 +11,6 @@
 #include <frm/Shader.h>
 #include <frm/Texture.h>
 
-
 #include <apt/ArgList.h>
 #include <apt/Image.h>
 
@@ -34,7 +33,7 @@ LensFlare_ScreenSpace::LensFlare_ScreenSpace()
 	propGroup.addFloat ("Ghost Spacing",         0.1f,          0.0f,   2.0f,    &m_ghostSpacing);
 	propGroup.addFloat ("Ghost Threshold",       2.0f,          0.0f,   20.0f,   &m_ghostThreshold);
 	propGroup.addFloat ("Halo Radius",           0.6f,          0.0f,   2.0f,    &m_haloRadius);
-	propGroup.addFloat ("Halo Thickneess",       0.1f,          0.0f,   0.4f,    &m_haloThickness);
+	propGroup.addFloat ("Halo Thickness",        0.1f,          0.0f,   0.4f,    &m_haloThickness);
 	propGroup.addFloat ("Halo Threshold",        2.0f,          0.0f,   20.0f,   &m_haloThreshold);
 	propGroup.addFloat ("Halo Aspect Ratio",     1.0f,          0.0f,   2.0f,    &m_haloAspectRatio);
 	propGroup.addInt   ("Blur Size",             16,            1,      64,      &m_blurSize);

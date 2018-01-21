@@ -1,9 +1,4 @@
-/*	Screen space lens flare.
-*/
-
 #pragma once
-#ifndef LensFlare_ScreenSpace_h
-#define LensFlare_ScreenSpace_h
 
 #include <frm/AppSample3d.h>
 #include <frm/RenderNodes.h>
@@ -63,6 +58,3 @@ public:
 	bool initLensFlare();
 	void shutdownLensFlare();
 };
-
-
-#endif // AppSkeleton_h

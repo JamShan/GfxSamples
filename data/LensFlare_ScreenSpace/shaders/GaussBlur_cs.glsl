@@ -16,8 +16,8 @@ void main()
 
 	int sampleCount = clamp(int(uRadiusPixels / 2), 4, int(64));
 		
-	float kSigma     = float(sampleCount) / 3.0; // low divisor = more blur but clamps the weight function above zero
-	float kSigma2    = kSigma * kSigma;
+	float kSigma    = float(sampleCount) / 3.0; // low divisor = more blur but clamps the weight function above zero
+	float kSigma2   = kSigma * kSigma;
 		
  // set up incremental counter
 	vec3 gaussInc;

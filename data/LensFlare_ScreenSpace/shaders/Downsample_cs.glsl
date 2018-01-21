@@ -16,9 +16,6 @@ void main()
 	vec4 ret = vec4(0.0);
 	#if 1
 	 // 3x3 Gaussian blur
-	 // \todo exploit separability for kernel sizes (store intermediate pass in shared memory);
-	 // For this to work you have to do some redundant work per group to sample extra rows in the horizontal pass, which results in more texture fetches than a 2-pass approach.
-	 // It may still be worth exploring, particularly for small kernels.
 		const float kernel[9] = {
 			0.077847, 0.123317, 0.077847,
 			0.123317, 0.195346, 0.123317,
@@ -35,16 +32,6 @@ void main()
 		}
 
 	#else
-	/*
-		+---+---+    +-------+
-		| X | X |    |       |
-		+---+---+ <===== X   |
-		| X | X |    |       |
-		+---+---+    +-------+
-		
-		Uv is texel center, so add 1/4 texels offset to sample the footprint.
-	 
-	 */
 		vec2 offset = 0.25 / vec2(txSize);
 		ret += textureLod(txSrc, uv + vec2(-offset.x, -offset.x), uSrcLevel);
 		ret += textureLod(txSrc, uv + vec2( offset.x, -offset.x), uSrcLevel);
