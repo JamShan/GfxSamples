@@ -34,8 +34,14 @@ uniform image2D writeonly txDst;
 #endif
 #define GetWeight(_i) (uWeights[_i])
 
-uniform float      uWeights[KERNEL_SIZE];
-uniform OffsetType uOffsets[KERNEL_SIZE];
+layout(std430) restrict readonly buffer bfWeights
+{
+	float uWeights[];
+};
+layout(std430) restrict readonly buffer bfOffsets
+{
+	OffsetType uOffsets[];
+};
 
 void main()
 {
