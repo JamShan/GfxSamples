@@ -57,9 +57,9 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>EA_COMPILER_NO_EXCEPTIONS;APT_DEBUG;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>EA_COMPILER_NO_EXCEPTIONS;APT_DEBUG;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all\extern;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\win;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\win\extern;..\..\extern\GfxSampleFramework\src\all;..\..\extern\GfxSampleFramework\src\all\extern;..\..\extern\GfxSampleFramework\src\win;..\..\extern\GfxSampleFramework\src\win\extern;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ExceptionHandling>false</ExceptionHandling>
@@ -70,7 +70,6 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>shlwapi.lib;hid.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(ProjectDir)..\..\data\Convolution"
@@ -82,7 +81,7 @@ mklink /j "$(ProjectDir)..\..\bin\Convolution" "$(ProjectDir)..\..\data\Convolut
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>EA_COMPILER_NO_EXCEPTIONS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>EA_COMPILER_NO_EXCEPTIONS;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;GLEW_STATIC;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\all\extern;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\win;..\..\extern\GfxSampleFramework\extern\ApplicationTools\src\win\extern;..\..\extern\GfxSampleFramework\src\all;..\..\extern\GfxSampleFramework\src\all\extern;..\..\extern\GfxSampleFramework\src\win;..\..\extern\GfxSampleFramework\src\win\extern;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Full</Optimization>
@@ -101,7 +100,6 @@ mklink /j "$(ProjectDir)..\..\bin\Convolution" "$(ProjectDir)..\..\data\Convolut
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>shlwapi.lib;hid.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(ProjectDir)..\..\data\Convolution"
