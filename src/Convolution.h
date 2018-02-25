@@ -54,6 +54,8 @@ protected:
 	frm::Texture* m_txSrc;
 	frm::Texture* m_txDst[2];
 	frm::Shader*  m_shConvolution;
+	frm::Buffer*  m_bfWeights;
+	frm::Buffer*  m_bfOffsets;
 };
 
 

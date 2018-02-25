@@ -440,13 +440,8 @@ void Convolution::draw()
 	
 	{	AUTO_MARKER("Convolution");
 		ctx->setShader(m_shConvolution);
-		if (is2d) {
-			ctx->setUniformArray("uWeights", m_weights, m_kernelSize);
-			ctx->setUniformArray("uOffsets", (vec2*)m_offsets, m_kernelSize);
-		} else {
-			ctx->setUniformArray("uWeights", m_weights, m_kernelSize);
-			ctx->setUniformArray("uOffsets", m_offsets, m_kernelSize);
-		}
+		ctx->bindBuffer(m_bfWeights);
+		ctx->bindBuffer(m_bfOffsets);
 
 		if (is2d) {
 			ctx->bindTexture("txSrc", m_txSrc);
@@ -561,6 +556,12 @@ void Convolution::initKernel()
 	default:
 		break;
 	}
+
+ // buffers
+	m_bfWeights = Buffer::Create(GL_SHADER_STORAGE_BUFFER, sizeof(float) * m_kernelSize, 0, m_weights);
+	m_bfWeights->setName("bfWeights");
+	m_bfOffsets = Buffer::Create(GL_SHADER_STORAGE_BUFFER, sizeof(float) * m_kernelSize * kernelDims, 0, m_offsets);
+	m_bfOffsets->setName("bfOffsets");
 	
  // shader
 	ShaderDesc shDesc;
@@ -578,4 +579,6 @@ void Convolution::shutdownKernel()
 	delete[] m_offsets;
 
 	Shader::Release(m_shConvolution);
+	Buffer::Destroy(m_bfWeights);
+	Buffer::Destroy(m_bfOffsets);
 }
