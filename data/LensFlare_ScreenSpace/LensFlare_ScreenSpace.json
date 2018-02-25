@@ -5,6 +5,7 @@
 		"Downsample": 2,
 		"Ghost Count": 5,
 		"Global Brightness": 0.05000000074505806,
+		"Halo Thickness": 0.10000000149011612,
 		"Blur Size": 12,
 		"Halo Radius": 0.6000000238418579,
 		"Lens Flare Only": false,
