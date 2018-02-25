@@ -8,7 +8,8 @@ workspace "GfxSamples"
 	location(_ACTION)
 	configurations { "Debug", "Release" }
 	platforms { "Win64" }
-	flags { "C++11", "StaticRuntime" }
+	cppdialect "C++11"
+	flags { "StaticRuntime" }
 	filter { "platforms:Win64" }
 		system "windows"
 		architecture "x86_64"
@@ -24,9 +25,6 @@ workspace "GfxSamples"
 			"../bin"
 			)
 	group ""
-	ApplicationTools_Link()
-	GfxSampleFramework_Link()
-
 
 	local projList = dofile("projects.lua")
 	for name,fileList in pairs(projList) do
@@ -35,6 +33,9 @@ workspace "GfxSamples"
 			language "C++"
 			targetdir "../bin"
 
+		ApplicationTools_Link()
+		GfxSampleFramework_Link()
+	
 		filter { "configurations:debug" }
 			targetsuffix "_debug"
 			symbols "On"
@@ -44,6 +45,7 @@ workspace "GfxSamples"
 			symbols "Off"
 			optimize "Full"
 		filter {}
+	
 
 			files(fileList)
 			files({
