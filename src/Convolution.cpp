@@ -230,7 +230,7 @@ void KernelOptimizeBilinear2d(int _size, const float* _weightsIn, float* weights
 
 	const int k = (row / 2) * outSize + (col / 2);
 	weightsOut_[k] = _weightsIn[(row * _size) + col];
-	offsetsOut_[k] = vec2(_size / 2);
+	offsetsOut_[k] = vec2(_size / 2.0f);
 	
 }
 
@@ -438,7 +438,7 @@ void Convolution::draw()
 
 	bool is2d = m_mode == Mode_2d || m_mode == Mode_2dBilinear;
 	
-	{	AUTO_MARKER("Convolution");
+	{	PROFILER_MARKER("Convolution");
 		ctx->setShader(m_shConvolution);
 		ctx->bindBuffer(m_bfWeights);
 		ctx->bindBuffer(m_bfOffsets);

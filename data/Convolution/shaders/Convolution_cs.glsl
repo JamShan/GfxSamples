@@ -1,7 +1,7 @@
 #include "shaders/def.glsl"
 
 uniform sampler2D txSrc;
-uniform image2D writeonly txDst;
+uniform writeonly image2D txDst;
 
 #define Type_Box                0
 #define Type_Gaussian           1
